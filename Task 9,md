@@ -1,0 +1,22 @@
+# Task 9 - Search Analytics
+
+This task adds basic monitoring for search operations in the RAG system.
+
+## Implemented Features
+
+1. **SearchAnalytics class** (`src/trackrealties/analytics/search.py`)
+   - Stores search execution logs in memory.
+   - Records query text, chosen strategy, response time, and result count.
+   - Provides aggregation methods to build a simple performance report.
+2. **Integration with `EnhancedRAGPipeline`**
+   - Each search request now logs analytics data including strategy used and response time.
+3. **New API Endpoint** `/analytics/search-report`
+   - Returns aggregated metrics from `SearchAnalytics.generate_performance_report()`.
+
+## Usage
+
+1. Perform searches using the existing `/rag/search` or `/rag/query` endpoints.
+2. Retrieve analytics by calling `GET /analytics/search-report`.
+   The response summarizes strategy usage, recent queries, and failed searches.
+
+This functionality helps monitor search effectiveness and performance without requiring an external database.

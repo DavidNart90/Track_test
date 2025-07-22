@@ -4,10 +4,12 @@ Replace existing search.py implementation with optimized routing
 """
 
 import logging
+from datetime import datetime
 from typing import List, Dict, Any, Optional
 from src.trackrealties.core.graph import graph_manager
 from src.trackrealties.core.database import db_pool
 from src.trackrealties.models.search import SearchResult
+from src.trackrealties.analytics.search import search_analytics, SearchAnalytics
 from smart_search_implementation import (
     SmartSearchRouter,
     FixedGraphSearch,
@@ -487,11 +489,13 @@ class EnhancedRAGPipeline:
     Enhanced RAG pipeline with smart search routing
     """
     
-    def __init__(self):
+    def __init__(self, analytics: SearchAnalytics | None = None):
         self.smart_router = SmartSearchRouter()
         self.vector_search = OptimizedVectorSearch()
         self.graph_search = OptimizedGraphSearch()
         self.hybrid_search = OptimizedHybridSearch()
+
+        self.analytics = analytics or search_analytics
         
         # Set search engines in router
         self.smart_router.vector_search = self.vector_search
@@ -517,17 +521,29 @@ class EnhancedRAGPipeline:
             await self.initialize()
         
         try:
+            start_time = datetime.utcnow()
+
             # Determine optimal search strategy
             strategy = await self.smart_router.route_search(query, user_context)
-            
+
             # Execute search with selected strategy
             results = await self.smart_router.execute_search(
                 query, strategy, limit=limit, filters=filters
             )
-            
+
+            response_time = (datetime.utcnow() - start_time).total_seconds()
+
             # Log search performance
-            logger.info(f"Search completed: {len(results)} results using {strategy}")
-            
+            logger.info(
+                f"Search completed: {len(results)} results using {strategy} in {response_time:.2f}s"
+            )
+
+            # Send analytics
+            if self.analytics:
+                await self.analytics.log_search_execution(
+                    query, strategy, results, response_time
+                )
+
             return results
             
         except Exception as e:
