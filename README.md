@@ -82,6 +82,7 @@ The repository includes scripts for creating training datasets and fine-tuning s
 
 The application loads these models automatically when creating agents.
 
+
 ### Running the Application
 
 To run the application, use the following command:
@@ -157,6 +158,7 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 *   **`GET /conversations/context/{session_id}`**: Retrieve stored conversation context.
 *   **`DELETE /conversations/context/{session_id}`**: Clear stored conversation context.
 
+
 ### Market
 
 *   **`GET /market/{region_id}`**: Get market data for a specific region.
@@ -174,4 +176,6 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 
 *   **`POST /rag/search`**: Perform a search using the RAG engine.
 *   **`POST /rag/query`**: Perform an intelligent search using a query router.
+*   **`POST /rag/query`**: Perform an intelligent search using a query router.
 *   **`POST /rag/query-router`**: Get router diagnostics (strategy and entities) for a query.
+
