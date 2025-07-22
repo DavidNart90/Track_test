@@ -9,71 +9,37 @@ from .tools import (
     MarketAnalysisTool,
     InvestmentOpportunityAnalysisTool,
     ROIProjectionTool,
-    RiskAssessmentTool
+    RiskAssessmentTool,
 )
-
-INVESTOR_SYSTEM_PROMPT = """
-You are a sophisticated real estate investment advisor. Your goal is to help users
-identify and analyze investment opportunities. You are analytical, data-driven, and
-provide clear, concise financial metrics.
-
-When a user asks a general question about a market or property type, use the
-`vector_search` tool to find relevant properties and market data. For questions
-about relationships between market entities, use the `graph_search` tool.
-
-When a user provides specific numbers for a property (purchase price, rent, expenses),
-use the `investment_opportunity_analysis` tool to perform a financial analysis. Use the
-`roi_projection` tool to project returns over time.
-
-Always assess the risks of any investment using the `risk_assessment` tool and
-present the results clearly to the user.
-"""
-
+from .prompts import BASE_SYSTEM_CONTEXT, INVESTOR_SYSTEM_PROMPT
 
 class InvestorAgent(BaseAgent):
     """Agent specializing in real estate investor tasks."""
 
     def __init__(self, deps: Optional[AgentDependencies] = None):
-        tools = [
-            VectorSearchTool(deps=deps),
-            GraphSearchTool(deps=deps),
-            MarketAnalysisTool(deps=deps),
-            InvestmentOpportunityAnalysisTool(deps=deps),
-            ROIProjectionTool(deps=deps),
-            RiskAssessmentTool(deps=deps),
-        ]
+        tools = self._get_tools(deps)
+
+        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
+        model = role_models.get("investor") if role_models else None
+
         super().__init__(
             agent_name="investor_agent",
+            model=model,
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
         )
 
     def get_role_specific_prompt(self) -> str:
-        return """
-        You are a sophisticated real estate investment advisor. Your goal is to help users
-        identify and analyze investment opportunities. You are analytical, data-driven, and
-        provide clear, concise financial metrics.
+        return f"{BASE_SYSTEM_CONTEXT}\n{INVESTOR_SYSTEM_PROMPT}"
 
-        When a user asks a general question about a market or property type, use the
-        `vector_search` tool to find relevant properties and market data. For questions
-        about relationships between market entities, use the `graph_search` tool.
-
-        When a user provides specific numbers for a property (purchase price, rent, expenses),
-        use the `investment_opportunity_analysis` tool to perform a financial analysis. Use the
-        `roi_projection` tool to project returns over time.
-
-        Always assess the risks of any investment using the `risk_assessment` tool and
-        present the results clearly to the user.
-        """
-
-    def _get_tools(self) -> List[BaseTool]:
+    def _get_tools(self, deps: Optional[AgentDependencies] = None) -> List[BaseTool]:
         """Returns the list of tools available to the investor agent."""
         return [
-            VectorSearchTool(),
-            GraphSearchTool(),
-            MarketAnalysisTool(),
-            InvestmentOpportunityAnalysisTool(),
-            ROIProjectionTool(),
-            RiskAssessmentTool()
+            VectorSearchTool(deps=deps),
+            GraphSearchTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
+            InvestmentOpportunityAnalysisTool(deps=deps),
+            ROIProjectionTool(deps=deps),
+            RiskAssessmentTool(deps=deps),
         ]
