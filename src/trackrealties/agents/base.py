@@ -67,6 +67,8 @@ class BaseAgent(ABC):
         self,
         agent_name: str,
         model: Union[str, OpenAI] = None,
+        *,
+        model_path: Optional[str] = None,
         system_prompt: str = "You are a helpful AI assistant.",
         tools: List[Type[BaseTool]] = None,
         deps: Optional[AgentDependencies] = None,
@@ -78,6 +80,8 @@ class BaseAgent(ABC):
         self.dependencies = deps or AgentDependencies()
         self.validator = validator
         self.tools = {tool.name: tool for tool in (tools or [])}
+
+        self.model_path = model_path
 
         _model = model or settings.DEFAULT_MODEL
         if isinstance(_model, str):

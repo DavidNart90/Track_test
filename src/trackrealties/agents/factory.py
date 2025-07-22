@@ -1,25 +1,37 @@
-"""
-Factory for creating agent instances.
-"""
-from typing import Type
-from .base import BaseAgent
+"""Factory utilities for creating agent instances and loading fine-tuned models."""
+from pathlib import Path
+from typing import Type, Optional
+
+from .base import BaseAgent, AgentDependencies
 from .roles import UserRole
 from .investor import InvestorAgent
 from .developer import DeveloperAgent
 from .buyer import BuyerAgent
 from .agent import AgentAgent
 
+_ROLE_TO_CLASS = {
+    UserRole.INVESTOR: InvestorAgent,
+    UserRole.DEVELOPER: DeveloperAgent,
+    UserRole.BUYER: BuyerAgent,
+    UserRole.AGENT: AgentAgent,
+}
+
+
 def get_agent_class(role: UserRole) -> Type[BaseAgent]:
-    """Returns the agent class corresponding to the user role."""
-    if role == UserRole.INVESTOR:
-        return InvestorAgent
-    elif role == UserRole.DEVELOPER:
-        return DeveloperAgent
-    elif role == UserRole.BUYER:
-        return BuyerAgent
-    elif role == UserRole.AGENT:
-        return AgentAgent
-    else:
-        # Fallback to a general agent if no specific role matches
-        # For now, we raise an error as per the original logic.
-        raise NotImplementedError(f"No agent implemented for role: {role.value}")
+    """Return the agent class for a user role."""
+    if role in _ROLE_TO_CLASS:
+        return _ROLE_TO_CLASS[role]
+    raise NotImplementedError(f"No agent implemented for role: {role.value}")
+
+
+def _get_model_path(role: UserRole) -> Optional[str]:
+    """Return path to the fine-tuned model for the given role if available."""
+    model_dir = Path(f"models/{role.value}_llm")
+    return model_dir.as_posix() if model_dir.exists() else None
+
+
+def create_agent(role: UserRole, deps: Optional[AgentDependencies] = None) -> BaseAgent:
+    """Instantiate an agent with its fine-tuned model path if it exists."""
+    agent_class = get_agent_class(role)
+    model_path = _get_model_path(role)
+    return agent_class(deps=deps, model_path=model_path)

@@ -7,7 +7,7 @@ from uuid import UUID
 from asyncpg import Connection
 
 from ..data.repository import SessionRepository
-from .factory import get_agent_class
+from .factory import create_agent, get_agent_class
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +25,12 @@ async def run_agent_turn(
     if not session:
         raise ValueError("Session not found or has expired.")
 
-    # 2. Get the appropriate agent class from the factory
+    # 2. Instantiate the appropriate agent using the factory
     try:
-        agent_class = get_agent_class(session.user_role)
+        agent = create_agent(session.user_role)
     except NotImplementedError as e:
         logger.warning(f"Could not find agent for role {session.user_role}: {e}")
         raise
-
-    # 3. Instantiate the agent
-    agent = agent_class()
 
     # 4. Run the agent
     response = await agent.run(
@@ -59,12 +56,13 @@ async def stream_agent_turn(
         raise ValueError("Session not found or has expired.")
 
     try:
-        agent_class = get_agent_class(session.user_role)
+        agent = create_agent(session.user_role)
     except NotImplementedError as e:
         logger.warning(f"Could not find agent for role {session.user_role}: {e}")
         raise
 
-    agent = agent_class(session_id=str(session.id), user_id=session.user_id)
+    # Pass session context to agent if needed
+    agent.dependencies.context_manager.get_or_create_context(str(session.id), session.user_id, session.user_role.value)
 
     async for chunk in agent.stream(query):
         yield chunk

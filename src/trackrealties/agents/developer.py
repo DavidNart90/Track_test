@@ -34,7 +34,9 @@ Always provide clear, actionable insights based on the tool outputs.
 class DeveloperAgent(BaseAgent):
     """Agent specializing in real estate developer tasks."""
 
-    def __init__(self, deps: Optional[AgentDependencies] = None):
+    MODEL_PATH = "models/developer_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
         tools = [
             ZoningAnalysisTool(deps=deps),
             ConstructionCostEstimationTool(deps=deps),
@@ -47,6 +49,7 @@ class DeveloperAgent(BaseAgent):
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:

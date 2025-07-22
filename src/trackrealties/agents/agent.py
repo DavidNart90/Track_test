@@ -34,7 +34,9 @@ Always be professional, thorough, and proactive in your responses.
 class AgentAgent(BaseAgent):
     """Agent specializing in real estate agent tasks."""
 
-    def __init__(self, deps: Optional[AgentDependencies] = None):
+    MODEL_PATH = "models/agent_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
         tools = [
             VectorSearchTool(deps=deps),
             GraphSearchTool(deps=deps),
@@ -50,6 +52,7 @@ class AgentAgent(BaseAgent):
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:

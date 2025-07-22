@@ -27,10 +27,11 @@ You are encouraging, patient, and focused on the buyer's lifestyle and needs.
 """
 
 class BuyerAgent(BaseAgent):
-    """
-    An agent specialized in assisting home buyers.
-    """
-    def __init__(self, deps: Optional[AgentDependencies] = None):
+    """An agent specialized in assisting home buyers."""
+
+    MODEL_PATH = "models/buyer_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
         tools = [
             VectorSearchTool(deps=deps),
             PropertyRecommendationTool(deps=deps),
@@ -40,7 +41,8 @@ class BuyerAgent(BaseAgent):
             agent_name="buyer_agent",
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
-            deps=deps
+            deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:
