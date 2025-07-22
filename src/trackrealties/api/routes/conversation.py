@@ -10,6 +10,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from fastapi.responses import JSONResponse
+from src.trackrealties.agents.context import ContextManager
 
 from asyncpg import Connection
 from src.trackrealties.api.dependencies import get_db_connection
@@ -23,6 +24,9 @@ from src.trackrealties.api.dependencies import get_current_session
 
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
+
+# In-memory manager for conversation contexts
+context_manager = ContextManager()
 
 
 @router.post("/messages", response_model=ConversationMessageResponse)
@@ -233,5 +237,21 @@ async def delete_conversation(
     success = await repo.delete_conversation(target_session_id)
     if not success:
         raise HTTPException(status_code=404, detail="Conversation not found")
-    
+
     return {"success": True, "message": "Conversation deleted successfully"}
+
+
+@router.get("/context/{session_id}")
+async def get_context(session_id: UUID):
+    """Retrieve stored conversation context."""
+    context = context_manager.get_context(str(session_id))
+    if not context:
+        raise HTTPException(status_code=404, detail="Context not found")
+    return JSONResponse(content=context.dict())
+
+
+@router.delete("/context/{session_id}")
+async def clear_context(session_id: UUID):
+    """Clear stored conversation context."""
+    context_manager.clear_context(str(session_id))
+    return {"success": True, "message": "Context cleared"}

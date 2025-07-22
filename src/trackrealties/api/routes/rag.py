@@ -10,6 +10,7 @@ import time
 from ...models.search import QueryRequest, SearchRequest, SearchResponse, SearchResult
 from ...rag.router import QueryRouter
 from ...rag.synthesizer import ResponseSynthesizer
+from ...rag.entity_extractor import EntityExtractor
 from rag_pipeline_integration import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
@@ -114,3 +115,17 @@ async def intelligent_query(
     except Exception as e:
         logger.error(f"Error during intelligent query: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="An error occurred during the query.")
+
+
+@router.post("/query-router")
+async def query_router_diagnostics(request: QueryRequest):
+    """Return router diagnostics for a query."""
+    try:
+        router = QueryRouter()
+        extractor = EntityExtractor()
+        strategy = router.route_query(request.query)
+        entities = await extractor.extract_entities(request.query)
+        return {"strategy": strategy, "entities": entities}
+    except Exception as e:
+        logger.error(f"Query router diagnostics failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to analyze query")

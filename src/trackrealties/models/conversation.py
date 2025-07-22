@@ -1,13 +1,25 @@
-from sqlalchemy import (
-    Column, String, DateTime, ForeignKey, Text, Integer, Numeric, CheckConstraint, text
-)
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
-from sqlalchemy.sql import func
 import uuid
 from datetime import datetime
-from typing import List, Optional, Dict, Any
+from typing import Any
+
 from pydantic import BaseModel, Field
+from sqlalchemy import (
+    CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Numeric,
+    String,
+    Text,
+    text,
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.sql import func
+
 from src.trackrealties.models.base import Base
+
 from .session import ChatSession
 
 
@@ -23,7 +35,7 @@ class ConversationMessage(Base):
     confidence_score = Column(Numeric(3, 2), nullable=True)
     processing_time_ms = Column(Integer, nullable=True)
     token_count = Column(Integer, nullable=True)
-    message_metadata = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    metadata = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
@@ -38,20 +50,20 @@ class MessageCreateRequest(BaseModel):
     session_id: uuid.UUID
     role: str = Field(..., pattern="^(user|assistant|system)$")
     content: str
-    tools_used: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
-    validation_result: Optional[Dict[str, Any]] = None
-    confidence_score: Optional[float] = Field(None, ge=0, le=1)
-    processing_time_ms: Optional[int] = None
-    token_count: Optional[int] = None
-    message_metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    tools_used: list[dict[str, Any]] | None = Field(default_factory=list)
+    validation_result: dict[str, Any] | None = None
+    confidence_score: float | None = Field(None, ge=0, le=1)
+    processing_time_ms: int | None = None
+    token_count: int | None = None
+    metadata: dict[str, Any] | None = Field(default_factory=dict)
 
 
 class MessageUpdateRequest(BaseModel):
-    content: Optional[str] = None
-    tools_used: Optional[List[Dict[str, Any]]] = None
-    validation_result: Optional[Dict[str, Any]] = None
-    confidence_score: Optional[float] = Field(None, ge=0, le=1)
-    message_metadata: Optional[Dict[str, Any]] = None
+    content: str | None = None
+    tools_used: list[dict[str, Any]] | None = None
+    validation_result: dict[str, Any] | None = None
+    confidence_score: float | None = Field(None, ge=0, le=1)
+    metadata: dict[str, Any] | None = None
 
 
 class ConversationMessageResponse(BaseModel):
@@ -59,12 +71,12 @@ class ConversationMessageResponse(BaseModel):
     session_id: uuid.UUID
     role: str
     content: str
-    tools_used: List[Dict[str, Any]]
-    validation_result: Optional[Dict[str, Any]]
-    confidence_score: Optional[float]
-    processing_time_ms: Optional[int]
-    token_count: Optional[int]
-    message_metadata: Dict[str, Any]
+    tools_used: list[dict[str, Any]]
+    validation_result: dict[str, Any] | None
+    confidence_score: float | None
+    processing_time_ms: int | None
+    token_count: int | None
+    metadata: dict[str, Any]
     created_at: datetime
 
     class Config:
@@ -73,7 +85,7 @@ class ConversationMessageResponse(BaseModel):
 
 class ConversationHistory(BaseModel):
     session: ChatSession
-    messages: List[ConversationMessageResponse]
+    messages: list[ConversationMessageResponse]
     total_messages: int
     has_more: bool
 
@@ -88,17 +100,17 @@ class ConversationSummary(BaseModel):
     title: str
     last_message_at: datetime
     message_count: int
-    topics: List[str]
+    topics: list[str]
     preview: str
 
 
 class ConversationFilter(BaseModel):
-    user_id: Optional[uuid.UUID] = None
-    role_filter: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    contains_text: Optional[str] = None
-    property_reference: Optional[str] = None
-    market_reference: Optional[str] = None
+    user_id: uuid.UUID | None = None
+    role_filter: str | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    contains_text: str | None = None
+    property_reference: str | None = None
+    market_reference: str | None = None
     limit: int = 50
     offset: int = 0
