@@ -47,6 +47,7 @@ class GraphManager:
         self._initialized = False
 
     async def initialize(self) -> None:
+
         """
         Initialize the Neo4j driver.
         
@@ -56,6 +57,11 @@ class GraphManager:
         """
         if self._initialized and self._driver is not None:
             logger.debug("Neo4j driver already initialized.")
+        """Initialize the Neo4j driver."""
+        if self._driver is not None:
+            return
+        if not NEO4J_AVAILABLE:
+            logger.warning("Neo4j driver not available. Graph functionality will be limited.")
             return
         
         if not NEO4J_AVAILABLE:

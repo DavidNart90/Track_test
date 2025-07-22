@@ -7,6 +7,7 @@ retrieved data to detect and correct hallucinations.
 
 import logging
 from typing import Dict, Any, List, Tuple, Optional
+import re
 
 from ..core.config import get_settings
 from ..models.search import SearchResult
@@ -139,3 +140,25 @@ class ResponseValidator:
         
         # For now, return the original response
         return response
+
+
+
+class RealEstateHallucinationDetector:
+    """Simple hallucination detector for real estate content."""
+
+    def __init__(self):
+        self.factual_patterns = {
+            "prices": r"\$[\d,]+",
+        }
+
+    async def detect_hallucinations(
+        self, response: str, search_results: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        issues: List[str] = []
+        for name, pattern in self.factual_patterns.items():
+            for claim in re.findall(pattern, response):
+                if not any(
+                    claim in res.get("content", "") for res in search_results.get("results", [])
+                ):
+                    issues.append(f"Unsupported {name} claim: {claim}")
+        return {"has_hallucinations": bool(issues), "issues": issues}

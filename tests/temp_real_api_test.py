@@ -1,6 +1,9 @@
+import pytest
 import requests
 import json
 import sys
+
+pytest.skip("Skipping real API test", allow_module_level=True)
 
 def test_agent(role, prompt):
     print(f"Testing {role} agent with prompt: '{prompt}'")

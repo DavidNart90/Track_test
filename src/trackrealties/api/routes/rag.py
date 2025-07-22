@@ -9,22 +9,26 @@ import time
 
 from ...models.search import QueryRequest, SearchRequest, SearchResponse, SearchResult
 from ...rag.router import QueryRouter
-from ...rag.search import HybridSearchEngine
 from ...rag.synthesizer import ResponseSynthesizer
+from ...rag.entity_extractor import EntityExtractor
+from rag_pipeline_integration import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-async def get_search_engine():
-    """Dependency to get a HybridSearchEngine instance."""
-    engine = HybridSearchEngine()
-    await engine.initialize()
-    return engine
+pipeline = EnhancedRAGPipeline()
+
+
+async def get_search_engine() -> EnhancedRAGPipeline:
+    """Dependency to get an initialized EnhancedRAGPipeline instance."""
+    if not pipeline.initialized:
+        await pipeline.initialize()
+    return pipeline
 
 @router.post("/search", response_model=SearchResponse)
 async def search(
     request: SearchRequest,
-    search_engine: HybridSearchEngine = Depends(get_search_engine)
+    search_engine: EnhancedRAGPipeline = Depends(get_search_engine)
 ):
     """
     Perform a search using the RAG engine.
@@ -59,7 +63,7 @@ async def search(
 @router.post("/query", response_model=SearchResponse)
 async def intelligent_query(
     request: QueryRequest,
-    search_engine: HybridSearchEngine = Depends(get_search_engine),
+    search_engine: EnhancedRAGPipeline = Depends(get_search_engine),
 ):
     """
     Perform an intelligent search using a query router.
@@ -78,8 +82,7 @@ async def intelligent_query(
 
         # Perform search using the chosen strategy
         search_results: List[SearchResult] = await search_engine.search(
-            query=request.query,
-            search_type=search_strategy,
+            query=request.query
         )
 
         # Synthesize the response
@@ -112,3 +115,17 @@ async def intelligent_query(
     except Exception as e:
         logger.error(f"Error during intelligent query: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="An error occurred during the query.")
+
+
+@router.post("/query-router")
+async def query_router_diagnostics(request: QueryRequest):
+    """Return router diagnostics for a query."""
+    try:
+        router = QueryRouter()
+        extractor = EntityExtractor()
+        strategy = router.route_query(request.query)
+        entities = await extractor.extract_entities(request.query)
+        return {"strategy": strategy, "entities": entities}
+    except Exception as e:
+        logger.error(f"Query router diagnostics failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to analyze query")

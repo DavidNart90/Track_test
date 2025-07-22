@@ -13,6 +13,7 @@ from sqlalchemy import text
 from ...models.property import PropertyListing
 from ...analytics.cma_engine import ComparativeMarketAnalysis
 from ..dependencies import get_cma_engine, get_db_connection
+from ...analytics.search import search_analytics
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -63,3 +64,9 @@ async def generate_cma_endpoint(
     except Exception as e:
         logger.error(f"Error generating CMA report: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.get("/search-report", summary="Get aggregated search analytics")
+async def get_search_report():
+    """Return aggregated search analytics metrics."""
+    return await search_analytics.generate_performance_report()
