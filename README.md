@@ -64,6 +64,24 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
         ```
     *   This will chunk the data, generate embeddings using OpenAI's `text-embedding-3-small` model, and store the data in the PostgreSQL and Neo4j databases.
 
+### Training Role-Specific Models
+
+The repository includes scripts for creating training datasets and fine-tuning small language models for each user role.
+
+1. **Prepare the training data**
+    ```bash
+    python scripts/prepare_training_data.py
+    ```
+    This generates JSONL files under `training_data/` for investor, developer, buyer and agent roles.
+
+2. **Fine-tune the models**
+    ```bash
+    python scripts/fine_tune_models.py
+    ```
+    Each model will be saved under `models/{role}_llm/`.
+
+The application loads these models automatically when creating agents.
+
 ### Running the Application
 
 To run the application, use the following command:
@@ -136,6 +154,8 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 *   **`GET /conversations/sessions/{target_session_id}`**: Get conversation history for a session.
 *   **`GET /conversations/summaries`**: Get conversation summaries based on filter criteria.
 *   **`DELETE /conversations/sessions/{target_session_id}`**: Delete an entire conversation.
+*   **`GET /conversations/context/{session_id}`**: Retrieve stored conversation context.
+*   **`DELETE /conversations/context/{session_id}`**: Clear stored conversation context.
 
 ### Market
 
@@ -154,3 +174,4 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 
 *   **`POST /rag/search`**: Perform a search using the RAG engine.
 *   **`POST /rag/query`**: Perform an intelligent search using a query router.
+*   **`POST /rag/query-router`**: Get router diagnostics (strategy and entities) for a query.

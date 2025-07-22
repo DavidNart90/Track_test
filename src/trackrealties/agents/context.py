@@ -394,3 +394,31 @@ class ContextManager:
             },
             "conversations": user_contexts
         }
+
+    # ------------------------------------------------------------------
+    # CRUD-style helper methods for managing conversation sessions
+    # ------------------------------------------------------------------
+
+    def create_session(self, session_id: str, user_id: Optional[str] = None, user_role: Optional[str] = None) -> ConversationContext:
+        """Explicit wrapper to create a new session context."""
+        return self.get_or_create_context(session_id, user_id, user_role)
+
+    def read_session(self, session_id: str) -> Optional[ConversationContext]:
+        """Retrieve an existing session context if available."""
+        return self.get_context(session_id)
+
+    def update_session(self, session_id: str, *, message: Optional[Message] = None, preferences: Optional[Dict[str, Any]] = None) -> Optional[ConversationContext]:
+        """Update session data such as messages or preferences."""
+        context = self.get_context(session_id)
+        if not context:
+            return None
+        if message is not None:
+            context.add_message(message)
+        if preferences:
+            context.update_preferences(preferences)
+        self.update_context(session_id, context)
+        return context
+
+    def delete_session(self, session_id: str) -> None:
+        """Remove a session and its context from memory."""
+        self.clear_context(session_id)
