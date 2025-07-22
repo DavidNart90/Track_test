@@ -5,16 +5,16 @@ Replace existing search.py implementation with optimized routing
 
 import logging
 from typing import List, Dict, Any, Optional
-from ..core.graph import graph_manager
-from ..core.database import db_pool
-from ..models.search import SearchResult
-from .smart_search_router import (
-    SmartSearchRouter, 
-    FixedGraphSearch, 
+from src.trackrealties.core.graph import graph_manager
+from src.trackrealties.core.database import db_pool
+from src.trackrealties.models.search import SearchResult
+from smart_search_implementation import (
+    SmartSearchRouter,
+    FixedGraphSearch,
     SearchStrategy,
     RealEstateEntityExtractor
 )
-from .embedders import DefaultEmbedder
+from src.trackrealties.rag.embedders import DefaultEmbedder
 
 logger = logging.getLogger(__name__)
 

@@ -5,7 +5,8 @@ Fixes current graph schema issues and implements intelligent search routing
 
 import re
 import logging
-from typing import Dict, List, Any, Optional, Tuple, Enum
+from typing import Dict, List, Any, Optional, Tuple
+from enum import Enum
 from datetime import datetime
 import asyncio
 
