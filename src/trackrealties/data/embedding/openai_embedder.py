@@ -56,7 +56,7 @@ class OpenAIEmbedder(Embedder):
         """
         super().__init__(model, dimensions, batch_size, use_cache)
         self.api_key = api_key or settings.embedding_api_key or settings.llm_api_key
-        self.base_url = base_url or settings.embedding_base_url
+        self.base_url = base_url or settings.EMBEDDING_BASE_URL
         self.max_retries = max_retries
         self.retry_delay = retry_delay
         self.client = None

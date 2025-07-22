@@ -1,4 +1,3 @@
-
 """
 Core graph database utilities.
 """
@@ -28,6 +27,8 @@ class GraphManager:
 
     async def initialize(self) -> None:
         """Initialize the Neo4j driver."""
+        if self._driver is not None:
+            return
         if not NEO4J_AVAILABLE:
             logger.warning("Neo4j driver not available. Graph functionality will be limited.")
             return
