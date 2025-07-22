@@ -4,7 +4,7 @@ Replace existing search.py implementation with optimized routing
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 from src.trackrealties.core.graph import graph_manager
 from src.trackrealties.core.database import db_pool
 from src.trackrealties.models.search import SearchResult
@@ -15,6 +15,9 @@ from smart_search_implementation import (
     RealEstateEntityExtractor
 )
 from src.trackrealties.rag.embedders import DefaultEmbedder
+from src.trackrealties.rag.synthesizer import ResponseSynthesizer
+from src.trackrealties.validation.hallucination import RealEstateHallucinationDetector
+from src.trackrealties.models.agent import ValidationResult
 
 logger = logging.getLogger(__name__)
 
@@ -492,6 +495,9 @@ class EnhancedRAGPipeline:
         self.vector_search = OptimizedVectorSearch()
         self.graph_search = OptimizedGraphSearch()
         self.hybrid_search = OptimizedHybridSearch()
+
+        self.synthesizer = ResponseSynthesizer()
+        self.hallucination_detector = RealEstateHallucinationDetector()
         
         # Set search engines in router
         self.smart_router.vector_search = self.vector_search
@@ -534,6 +540,26 @@ class EnhancedRAGPipeline:
             logger.error(f"Enhanced RAG search failed: {e}")
             # Ultimate fallback
             return await self.vector_search.search(query, limit=limit, filters=filters)
+
+    async def generate_response(
+        self,
+        query: str,
+        context: Dict[str, Any],
+    ) -> Tuple[str, ValidationResult]:
+        """Search, synthesize, and validate a response."""
+        results = await self.search(
+            query,
+            user_context=context.get("user_context"),
+            limit=context.get("limit", 10),
+            filters=context.get("filters"),
+        )
+
+        response = await self.synthesizer.synthesize_response(query, results)
+        validation = await self.hallucination_detector.validate(
+            response,
+            {"search_results": [r.content for r in results], "query": query},
+        )
+        return response, validation
 
 
 # Usage Example for Integration

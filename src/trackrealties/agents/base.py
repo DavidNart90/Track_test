@@ -11,6 +11,7 @@ from pydantic_ai.providers.openai import OpenAIProvider as OpenAI
 from ..core.config import settings
 from .context import ContextManager
 from ..validation.base import ResponseValidator
+from ..models.agent import ValidationResult
 from pydantic_ai.models.openai import OpenAIModel
 from ..rag.pipeline import RAGPipeline
 from rag_pipeline_integration import EnhancedRAGPipeline
@@ -129,12 +130,14 @@ class BaseAgent(ABC):
         
         try:
             # Use the RAG pipeline to generate a response
-            response_content = await self.dependencies.rag_pipeline.generate_response(
+            response_content, validation = await self.dependencies.rag_pipeline.generate_response(
                 query=message,
                 context=context.dict()
             )
 
             agent_response = AgentResponse(content=response_content)
+            """codex/implement-realestatehallucinationdetector-and-tests"""
+            combined_result = validation
 
             # Append assistant message to history
             assistant_msg = ConversationMessage(
@@ -145,16 +148,26 @@ class BaseAgent(ABC):
             context.add_message(assistant_msg)
 
             # Persist updated context
-            self.dependencies.context_manager.update_context(session_id, context)
+             self.dependencies.context_manager.update_context(session_id, context)
+        """Planning-for-Phase-2-Docs"""
 
             if self.validator:
-                validation_result = await self.validator.validate_response(
+                extra = await self.validator.validate_response(
                     response=agent_response.content,
                     context=context,
                     user_query=message
                 )
-                agent_response.validation_result = validation_result.dict()
-                agent_response.confidence_score = validation_result.confidence_score
+                combined_result = ValidationResult(
+                    is_valid=validation.is_valid and extra.is_valid,
+                    confidence_score=min(validation.confidence_score, extra.confidence_score),
+                    issues=validation.issues + extra.issues,
+                    validation_type="combined",
+                    validator_version="1.0",
+                    correction_needed=validation.correction_needed or extra.correction_needed,
+                )
+
+            agent_response.validation_result = combined_result.dict()
+            agent_response.confidence_score = combined_result.confidence_score
 
             # Mock tool usage for now
             agent_response.tools_used = []
