@@ -14,26 +14,21 @@ from .tools import (
     ZoningAnalysisTool,
     ConstructionCostEstimationTool,
     FeasibilityAnalysisTool,
-    SiteAnalysisTool
+    SiteAnalysisTool,
 )
+from .prompts import BASE_SYSTEM_CONTEXT, AGENT_SYSTEM_PROMPT
 
-AGENT_SYSTEM_PROMPT = """
-You are an expert real estate agent's assistant. You have access to a complete
-set of tools for market analysis, investment evaluation, and development assessment.
-Your purpose is to provide comprehensive, accurate, and actionable information to
-help real estate agents serve their clients effectively.
-
-You can perform any task from searching for properties, analyzing investments,
-evaluating development sites, to providing market intelligence. Be ready to
-switch between different roles (buyer's agent, listing agent, etc.) as needed.
-
-Always be professional, thorough, and proactive in your responses.
-"""
 
 
 class AgentAgent(BaseAgent):
     """Agent specializing in real estate agent tasks."""
 
+    def __init__(self, deps: Optional[AgentDependencies] = None):
+        tools = self._get_tools(deps)
+
+        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
+        model = role_models.get("agent") if role_models else None
+=======
     MODEL_PATH = "models/agent_llm"
 
     def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
@@ -49,6 +44,7 @@ class AgentAgent(BaseAgent):
 
         super().__init__(
             agent_name="agent_agent",
+            model=model,
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
@@ -56,31 +52,20 @@ class AgentAgent(BaseAgent):
         )
 
     def get_role_specific_prompt(self) -> str:
-        return """
-        You are an expert real estate agent's assistant. You have access to a complete
-        set of tools for market analysis, investment evaluation, and development assessment.
-        Your purpose is to provide comprehensive, accurate, and actionable information to
-        help real estate agents serve their clients effectively.
+        return f"{BASE_SYSTEM_CONTEXT}\n{AGENT_SYSTEM_PROMPT}"
 
-        You can perform any task from searching for properties, analyzing investments,
-        evaluating development sites, to providing market intelligence. Be ready to
-        switch between different roles (buyer's agent, listing agent, etc.) as needed.
-
-        Always be professional, thorough, and proactive in your responses.
-        """
-
-    def _get_tools(self) -> List[BaseTool]:
+    def _get_tools(self, deps: Optional[AgentDependencies] = None) -> List[BaseTool]:
         """Returns the list of all tools available to the agent."""
         return [
-            VectorSearchTool(),
-            GraphSearchTool(),
-            MarketAnalysisTool(),
-            PropertyRecommendationTool(),
-            InvestmentOpportunityAnalysisTool(),
-            ROIProjectionTool(),
-            RiskAssessmentTool(),
-            ZoningAnalysisTool(),
-            ConstructionCostEstimationTool(),
-            FeasibilityAnalysisTool(),
-            SiteAnalysisTool()
+            VectorSearchTool(deps=deps),
+            GraphSearchTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
+            PropertyRecommendationTool(deps=deps),
+            InvestmentOpportunityAnalysisTool(deps=deps),
+            ROIProjectionTool(deps=deps),
+            RiskAssessmentTool(deps=deps),
+            ZoningAnalysisTool(deps=deps),
+            ConstructionCostEstimationTool(deps=deps),
+            FeasibilityAnalysisTool(deps=deps),
+            SiteAnalysisTool(deps=deps),
         ]

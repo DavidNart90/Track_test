@@ -8,32 +8,20 @@ from .tools import (
     ConstructionCostEstimationTool,
     FeasibilityAnalysisTool,
     SiteAnalysisTool,
-    MarketAnalysisTool
+    MarketAnalysisTool,
 )
-
-DEVELOPER_SYSTEM_PROMPT = """
-You are an expert real estate development consultant. Your purpose is to assist
-users in evaluating development opportunities, from zoning and feasibility to
-site analysis and cost estimation. You are precise, detail-oriented, and
-knowledgeable about the development lifecycle.
-
-When a user asks about the regulations for a specific property, use the
-`zoning_analysis` tool.
-
-To estimate the cost of a new construction project, use the
-`construction_cost_estimation` tool.
-
-To determine if a project is financially viable, use the `feasibility_analysis` tool.
-
-To evaluate the suitability of a potential site, use the `site_analysis` tool.
-
-Always provide clear, actionable insights based on the tool outputs.
-"""
+from .prompts import BASE_SYSTEM_CONTEXT, DEVELOPER_SYSTEM_PROMPT
 
 
 class DeveloperAgent(BaseAgent):
     """Agent specializing in real estate developer tasks."""
+    def __init__(self, deps: Optional[AgentDependencies] = None):
+        tools = self._get_tools(deps)
 
+        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
+        model = role_models.get("developer") if role_models else None
+
+=======
     MODEL_PATH = "models/developer_llm"
 
     def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
@@ -46,6 +34,7 @@ class DeveloperAgent(BaseAgent):
         ]
         super().__init__(
             agent_name="developer_agent",
+            model=model,
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
@@ -53,31 +42,14 @@ class DeveloperAgent(BaseAgent):
         )
 
     def get_role_specific_prompt(self) -> str:
-        return """
-        You are an expert real estate development consultant. Your purpose is to assist
-        users in evaluating development opportunities, from zoning and feasibility to
-        site analysis and cost estimation. You are precise, detail-oriented, and
-        knowledgeable about the development lifecycle.
+        return f"{BASE_SYSTEM_CONTEXT}\n{DEVELOPER_SYSTEM_PROMPT}"
 
-        When a user asks about the regulations for a specific property, use the
-        `zoning_analysis` tool.
-
-        To estimate the cost of a new construction project, use the
-        `construction_cost_estimation` tool.
-
-        To determine if a project is financially viable, use the `feasibility_analysis` tool.
-
-        To evaluate the suitability of a potential site, use the `site_analysis` tool.
-
-        Always provide clear, actionable insights based on the tool outputs.
-        """
-
-    def _get_tools(self) -> List[BaseTool]:
+    def _get_tools(self, deps: Optional[AgentDependencies] = None) -> List[BaseTool]:
         """Returns the list of tools available to the developer agent."""
         return [
-            ZoningAnalysisTool(),
-            ConstructionCostEstimationTool(),
-            FeasibilityAnalysisTool(),
-            SiteAnalysisTool(),
-            MarketAnalysisTool()
+            ZoningAnalysisTool(deps=deps),
+            ConstructionCostEstimationTool(deps=deps),
+            FeasibilityAnalysisTool(deps=deps),
+            SiteAnalysisTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
         ]
