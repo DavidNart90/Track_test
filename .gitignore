@@ -136,6 +136,9 @@ celerybeat.pid
 
 # Environments
 .env
+.env.test
+.env.example
+.env.local
 .envrc
 .venv
 env/
