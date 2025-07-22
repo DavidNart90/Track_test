@@ -21,12 +21,24 @@ class BuyerAgent(BaseAgent):
         role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
         model = role_models.get("buyer") if role_models else None
 
+class BuyerAgent(BaseAgent):
+    """An agent specialized in assisting home buyers."""
+
+    MODEL_PATH = "models/buyer_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
+        tools = [
+            VectorSearchTool(deps=deps),
+            PropertyRecommendationTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
+        ]
         super().__init__(
             agent_name="buyer_agent",
             model=model,
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:

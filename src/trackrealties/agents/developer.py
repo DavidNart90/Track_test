@@ -15,19 +15,30 @@ from .prompts import BASE_SYSTEM_CONTEXT, DEVELOPER_SYSTEM_PROMPT
 
 class DeveloperAgent(BaseAgent):
     """Agent specializing in real estate developer tasks."""
-
     def __init__(self, deps: Optional[AgentDependencies] = None):
         tools = self._get_tools(deps)
 
         role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
         model = role_models.get("developer") if role_models else None
 
+=======
+    MODEL_PATH = "models/developer_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
+        tools = [
+            ZoningAnalysisTool(deps=deps),
+            ConstructionCostEstimationTool(deps=deps),
+            FeasibilityAnalysisTool(deps=deps),
+            SiteAnalysisTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
+        ]
         super().__init__(
             agent_name="developer_agent",
             model=model,
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:

@@ -4,6 +4,8 @@ from unittest.mock import patch, AsyncMock
 from src.trackrealties.api.main import app
 from src.trackrealties.agents.base import AgentResponse
 
+pytest.skip("API tests require a running database", allow_module_level=True)
+
 @pytest.mark.anyio
 @pytest.mark.parametrize("role", ["investor", "developer", "buyer", "agent"])
 async def test_agent_chat_endpoint(role: str):

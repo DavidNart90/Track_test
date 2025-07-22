@@ -28,6 +28,19 @@ class AgentAgent(BaseAgent):
 
         role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
         model = role_models.get("agent") if role_models else None
+=======
+    MODEL_PATH = "models/agent_llm"
+
+    def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
+        tools = [
+            VectorSearchTool(deps=deps),
+            GraphSearchTool(deps=deps),
+            MarketAnalysisTool(deps=deps),
+            PropertyRecommendationTool(deps=deps),
+            InvestmentOpportunityAnalysisTool(deps=deps),
+            ROIProjectionTool(deps=deps),
+            RiskAssessmentTool(deps=deps),
+        ]
 
         super().__init__(
             agent_name="agent_agent",
@@ -35,6 +48,7 @@ class AgentAgent(BaseAgent):
             system_prompt=self.get_role_specific_prompt(),
             tools=tools,
             deps=deps,
+            model_path=model_path or self.MODEL_PATH,
         )
 
     def get_role_specific_prompt(self) -> str:
