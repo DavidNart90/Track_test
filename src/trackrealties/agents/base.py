@@ -14,6 +14,7 @@ from ..validation.base import ResponseValidator
 from pydantic_ai.models.openai import OpenAIModel
 from ..rag.pipeline import RAGPipeline
 from rag_pipeline_integration import EnhancedRAGPipeline
+from ..models.db import ConversationMessage, MessageRole
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,14 @@ class BaseAgent(ABC):
         Runs the agent for a single turn.
         """
         context = self.dependencies.context_manager.get_or_create_context(session_id, user_id, user_role)
+
+        # Record the user message in the conversation history
+        user_msg = ConversationMessage(
+            session_id=session_id,
+            role=MessageRole.USER,
+            content=message,
+        )
+        context.add_message(user_msg)
         
         try:
             # Use the RAG pipeline to generate a response
@@ -126,6 +135,17 @@ class BaseAgent(ABC):
             )
 
             agent_response = AgentResponse(content=response_content)
+
+            # Append assistant message to history
+            assistant_msg = ConversationMessage(
+                session_id=session_id,
+                role=MessageRole.ASSISTANT,
+                content=agent_response.content,
+            )
+            context.add_message(assistant_msg)
+
+            # Persist updated context
+            self.dependencies.context_manager.update_context(session_id, context)
 
             if self.validator:
                 validation_result = await self.validator.validate_response(
