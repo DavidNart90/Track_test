@@ -202,15 +202,17 @@ class GraphBuilder:
                     properties={"date": date}
                 )
             
-            # Create metrics relationships
+            # Create metrics relationships and count only succeeded ones
             self.logger.info(f"Creating metric nodes for {market_data_id}")
             metrics = ["median_price", "inventory_count", "sales_volume", "days_on_market", "months_supply", "price_per_sqft"]
+            metric_count = 0
             for metric in metrics:
                 if metric in market_data and market_data[metric] is not None:
                     metric_id = f"{metric}_{market_data_id}"
                     metric_node = await self._create_metric_node(market_data, metric, metric_id)
                     
                     if metric_node:
+                        metric_count += 1
                         await self._create_relationship(
                             from_node={"label": "MarketData", "id_field": "market_data_id", "id_value": market_data_id},
                             to_node={"label": "Metric", "id_field": "metric_id", "id_value": metric_id},
@@ -221,8 +223,8 @@ class GraphBuilder:
             return {
                 "market_data_id": market_data_id,
                 "region_id": region_id,
-                "nodes_created": 1 + bool(region_node) + len(metrics),
-                "relationships_created": bool(region_node) + len(metrics),
+                "nodes_created": 1 + bool(region_node) + metric_count,
+                "relationships_created": bool(region_node) + metric_count,
                 "success": True
             }
             
