@@ -8,7 +8,7 @@ from asyncpg import Connection
 
 from ...agents.context import ContextManager
 from ...models.api import ChatRequest, ChatResponse
-from ...agents.factory import get_agent_class
+from ...agents.factory import create_agent, get_agent_class
 from ...agents.base import AgentDependencies
 from ..dependencies import get_db_connection
 from ...data.repository import SessionRepository, MessageRepository
@@ -45,13 +45,12 @@ async def agent_chat(
             content=request.message
         )
 
-        # 3. Get agent class and run
-        agent_class = get_agent_class(session.user_role)
-        
-        # Create a new ContextManager for each request to ensure isolation
+        # 3. Create the agent instance
         context_manager = ContextManager()
-        
-        agent = agent_class(deps=AgentDependencies(context_manager=context_manager))
+        agent = create_agent(
+            session.user_role,
+            deps=AgentDependencies(context_manager=context_manager)
+        )
         agent_response = await agent.run(
             message=request.message,
             session_id=str(session.id),

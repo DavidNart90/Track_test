@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from ..core.config import settings
 from ..core.database import db_pool, test_connection
 from ..core.graph import graph_manager
+from .routes import rag
 
 # Configure logging
 logging.basicConfig(
@@ -34,7 +35,10 @@ async def lifespan(app: FastAPI):
         graph_ok = await graph_manager.test_connection()
         if not graph_ok:
             logger.error("Graph database connection failed on startup.")
-        
+
+        # Initialize the RAG pipeline
+        await rag.pipeline.initialize()
+
         logger.info("TrackRealties AI API startup complete.")
     except Exception as e:
         logger.error(f"Startup failed: {e}")
