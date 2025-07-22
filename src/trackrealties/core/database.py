@@ -1,14 +1,12 @@
 """Database utilities for PostgreSQL connection and operations.
 """
 
-import os
 import logging
 from contextlib import asynccontextmanager
-from typing import Optional, AsyncContextManager
+from typing import Optional
 
 import asyncpg
 from asyncpg.pool import Pool
-from asyncpg import Connection
 from .config import settings
 
 logger = logging.getLogger(__name__)

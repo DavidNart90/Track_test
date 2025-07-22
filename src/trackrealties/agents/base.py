@@ -152,8 +152,8 @@ class BaseAgent(ABC):
             context.add_message(assistant_msg)
 
             # Persist updated context
-             self.dependencies.context_manager.update_context(session_id, context)
-        """Planning-for-Phase-2-Docs"""
+            self.dependencies.context_manager.update_context(session_id, context)
+            # Planning-for-Phase-2-Docs
 
             if self.validator:
                 extra = await self.validator.validate_response(
