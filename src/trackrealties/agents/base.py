@@ -13,6 +13,7 @@ from .context import ContextManager
 from ..validation.base import ResponseValidator
 from pydantic_ai.models.openai import OpenAIModel
 from ..rag.pipeline import RAGPipeline
+from rag_pipeline_integration import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +52,7 @@ class BaseTool(ABC):
 class AgentDependencies(BaseModel):
     """Dependencies needed by agents and tools."""
     context_manager: ContextManager = Field(default_factory=ContextManager)
-    rag_pipeline: RAGPipeline = Field(default_factory=RAGPipeline)
+    rag_pipeline: RAGPipeline = Field(default_factory=EnhancedRAGPipeline)
     
     class Config:
         arbitrary_types_allowed = True
