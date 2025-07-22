@@ -5,7 +5,7 @@ The enhanced RAG pipeline for TrackRealties.
 
 from src.trackrealties.rag.base_enhanced_pipeline import EnhancedRAGPipeline
 from src.trackrealties.rag.search import VectorSearch, GraphSearch, HybridSearchEngine
-from src.trackrealties.rag.intelligent_router import IntelligentQueryRouter
+from src.trackrealties.rag.router import IntelligentQueryRouter, SearchStrategy
 from src.trackrealties.rag.context_manager import ContextManager
 
 class TrackRealitiesEnhancedRAG(EnhancedRAGPipeline):
@@ -64,13 +64,11 @@ class TrackRealitiesEnhancedRAG(EnhancedRAGPipeline):
         user_role = user_context.get('role', 'general')
 
         # 2. Route query intelligently
-        query_analysis = await self.smart_router.analyze_query(
-            query, user_context
-        )
+        strategy = await self.smart_router.route_search(query, user_context)
 
         # 3. Execute appropriate search strategy
         search_results = await self._execute_smart_search(
-            query, query_analysis
+            query, strategy
         )
 
         # 4. Generate response using role-specific LLM
@@ -85,15 +83,11 @@ class TrackRealitiesEnhancedRAG(EnhancedRAGPipeline):
 
         return validated_response
 
-    async def _execute_smart_search(self, query, query_analysis):
-        """
-        Executes the search strategy determined by the query router.
-        
-        This is a placeholder implementation.
-        """
-        if query_analysis.primary_strategy == "vector_only":
+    async def _execute_smart_search(self, query: str, strategy: SearchStrategy):
+        """Execute the search using the selected strategy."""
+        if strategy == SearchStrategy.VECTOR_ONLY:
             return await self.vector_search.search(query)
-        elif query_analysis.primary_strategy == "graph_only":
+        elif strategy == SearchStrategy.GRAPH_ONLY:
             return await self.graph_search.search(query)
         else:
             return await self.hybrid_search.search(query)
