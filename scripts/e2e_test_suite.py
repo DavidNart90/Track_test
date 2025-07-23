@@ -118,12 +118,22 @@ db_pool.acquire = _dummy_connection
 async def ingest_sample_data() -> None:
     """Simulate ingestion of sample data."""
     with open("sample_market_data.json", "r") as f:
-        data = json.load(f)
-    logger.info("Ingested %d market records", len(data))
+        market = json.load(f)
+    with open("sample_property_listings.json", "r") as f:
+        listings = json.load(f)
+    logger.info("Ingested %d market records and %d listings", len(market), len(listings))
+
+
+queries = {
+    "investor": "What is the ROI on 24727 Bogey Rdg, San Antonio, TX?",
+    "developer": "What is the median price in Athens, TX?",
+    "buyer": "Who is the listing agent for 333 Florida St, San Antonio, TX 78210?",
+    "agent": "Tell me about 7 W 21st St, New York, NY 10010",
+}
 
 
 async def call_chat_endpoint(client: AsyncClient, role: str) -> Dict[str, Any]:
-    payload = {"message": "hi", "session_id": str(uuid.uuid4())}
+    payload = {"message": queries[role], "session_id": str(uuid.uuid4())}
     resp = await client.post(f"/agents/{role}/chat", json=payload)
     body = resp.json()
     return {"status": resp.status_code, "body": body}
