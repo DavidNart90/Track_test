@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from smart_search_implementation import (
+from .smart_search import (
     FixedGraphSearch,
     RealEstateEntityExtractor,
     SmartSearchRouter,
