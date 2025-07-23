@@ -9,35 +9,41 @@ The application is built around a set of specialized AI agents, each tailored to
 The application is built with FastAPI with Pydantic AI and uses a PostgreSQL database to store session and conversation data, and a Neo4j database to store the knowledge graph.
 
 ### System Flow
-```mermaid
-flowchart TD
-    subgraph Ingestion
-        A[JSON Data] --> B[CLI Ingestion]
-        B --> C[Chunk & Embed]
-        C --> D[(PostgreSQL)]
-        C --> E[(Neo4j)]
-    end
-    subgraph Query
-        F[User Query] --> G[FastAPI API]
-        G --> H[Context Manager]
-        H --> I[Intelligent Router]
-        I -->|Vector| J[Vector Search]
-        I -->|Graph| K[Graph Search]
-        I -->|Hybrid| L[Hybrid Search]
-        J --> D
-        K --> E
-        L --> J
-        L --> K
-        J --> M[Results]
-        K --> M
-        L --> M
-        M --> N[Response Synthesizer]
-        N --> O[Hallucination Detector]
-        O --> P[Agent Response]
-    end
-    P --> H
-```
 
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TrackRealties AI Platform                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                             Ingestion Layer                                  │
+│  ┌─────────────────────┐  ┌───────────────────────────────────────────────┐ │
+│  │   JSON & CSV Files  │  │   CLI Chunking & Embedding                    │ │
+│  └─────────────────────┘  └───────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                               API Gateway                                    │
+│  ┌─────────────────────┐                                                   │
+│  │     FastAPI         │                                                   │
+│  └─────────────────────┘                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                        Agent Orchestration & Search                          │
+│  ┌─────────────────────┐  ┌───────────────────────┐  ┌────────────────────┐ │
+│  │  Context Manager    │  │  Intelligent Router   │  │ Role-Specific Agents│ │
+│  └─────────────────────┘  └───────┬───────────────┘  └────────────────────┘ │
+│                                    │                                        │
+│            ┌────────────┬──────────┴──────────┬──────────────┐              │
+│            │ VectorSearch│  GraphSearch       │   Hybrid     │              │
+│            └──────┬──────┴──────────┬─────────┴──────────────┘              │
+│                   │                 │                                     │
+│                   └──────────┬──────┴─────────────┬───────────────────────┘
+│                              │                    │                          
+│                              ▼                    ▼                         
+│                       Response Synthesizer   Hallucination Detector         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                             Data Storage Layer                               │
+│  ┌─────────────────────┐  ┌─────────────────────┐                           │
+│  │ PostgreSQL + pgvector│ │     Neo4j Graph DB  │                           │
+│  └─────────────────────┘  └─────────────────────┘                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
 ## Getting Started
 
 ### Prerequisites
@@ -50,13 +56,14 @@ flowchart TD
 ### Installation
 
 1.  **Clone the repository:**
-    ```bash
+    ```powershell
     git clone https://github.com/your-username/trackrealties-ai.git
     cd trackrealties-ai
     ```
 
 2.  **Install dependencies:**
-    ```bash
+
+    ```powershell
     py -m pip install -r requirements.txt
     ```
 
@@ -78,18 +85,18 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
 1.  **Clear existing data (optional):**
     *   If you want to start with a clean slate, you can run the following command to clear all data from the database tables.
     *   **Warning:** This will permanently delete all data in the tables.
-    ```bash
+    ```powershell
     python check_and_clear_data.py
     ```
 
 2.  **Ingest data:**
     *   The application provides a CLI for ingesting data from JSON files.
     *   **Ingest property listings:**
-        ```bash
+        ```powershell
         python -m src.trackrealties.cli enhanced-ingest sample_property_listings.json --data-type property
         ```
     *   **Ingest market data:**
-        ```bash
+        ```powershell
         python -m src.trackrealties.cli enhanced-ingest sample_market_data.json --data-type market
         ```
     *   This will chunk the data, generate embeddings using OpenAI's `text-embedding-3-small` model, and store the data in the PostgreSQL and Neo4j databases.
@@ -99,13 +106,13 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
 The repository includes scripts for creating training datasets and fine-tuning small language models for each user role.
 
 1. **Prepare the training data**
-    ```bash
+    ```powershell
     python scripts/prepare_training_data.py
     ```
     This generates JSONL files under `training_data/` for investor, developer, buyer and agent roles.
 
 2. **Fine-tune the models**
-    ```bash
+    ```powershell
     python scripts/fine_tune_models.py
     ```
     Each model will be saved under `models/{role}_llm/`.
@@ -125,6 +132,9 @@ The application loads these models automatically when creating agents.
 
 To run the application, use the following command:
 
+
+```powershell
+=======
 ```bash
 py -m uvicorn src.trackrealties.api.main:app --reload
 ```
