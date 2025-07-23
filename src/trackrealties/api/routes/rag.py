@@ -11,7 +11,7 @@ from ...models.search import QueryRequest, SearchRequest, SearchResponse, Search
 from ...rag.router import QueryRouter
 from ...rag.synthesizer import ResponseSynthesizer
 from ...rag.entity_extractor import EntityExtractor
-from rag_pipeline_integration import EnhancedRAGPipeline
+from ...rag.optimized_pipeline import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
