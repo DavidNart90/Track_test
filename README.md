@@ -9,6 +9,7 @@ The application is built around a set of specialized AI agents, each tailored to
 The application is built with FastAPI with Pydantic AI and uses a PostgreSQL database to store session and conversation data, and a Neo4j database to store the knowledge graph.
 
 ### System Flow
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           TrackRealties AI Platform                          │
@@ -43,7 +44,6 @@ The application is built with FastAPI with Pydantic AI and uses a PostgreSQL dat
 │  └─────────────────────┘  └─────────────────────┘                           │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
-
 ## Getting Started
 
 ### Prerequisites
@@ -62,6 +62,7 @@ The application is built with FastAPI with Pydantic AI and uses a PostgreSQL dat
     ```
 
 2.  **Install dependencies:**
+
     ```powershell
     py -m pip install -r requirements.txt
     ```
@@ -131,7 +132,10 @@ The application loads these models automatically when creating agents.
 
 To run the application, use the following command:
 
+
 ```powershell
+=======
+```bash
 py -m uvicorn src.trackrealties.api.main:app --reload
 ```
 
