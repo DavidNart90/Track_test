@@ -1,0 +1,162 @@
+import asyncio
+import json
+import uuid
+import logging
+from typing import List, Dict, Any
+import argparse
+from datetime import datetime
+from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock
+
+from httpx import AsyncClient, ASGITransport
+
+from src.trackrealties.api.main import app
+from src.trackrealties.api import dependencies as dep
+from src.trackrealties.api.routes import agents as agents_routes
+from src.trackrealties.core.database import db_pool
+from src.trackrealties.data import repository as repo_module
+from src.trackrealties.models.db import Session, UserRole, ConversationMessage, MessageRole
+
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+# ---- Fake repository implementations ----
+class FakeSessionRepository:
+    def __init__(self, conn):
+        self.conn = conn
+
+    async def create_user_session(
+        self,
+        role: UserRole,
+        user_id: str | None = None,
+        session_data: Dict[str, Any] | None = None,
+        timeout_minutes: int = 60,
+    ) -> Session:
+        now = datetime.utcnow()
+        return Session(
+            id=uuid.uuid4(),
+            user_id=user_id,
+            user_role=role,
+            session_data=session_data or {},
+            created_at=now,
+            updated_at=now,
+            expires_at=now,
+            is_active=True,
+        )
+
+    async def get_session(self, session_id: uuid.UUID) -> Session | None:
+        now = datetime.utcnow()
+        return Session(
+            id=session_id,
+            user_id="test",
+            user_role=UserRole.BUYER,
+            session_data={},
+            created_at=now,
+            updated_at=now,
+            expires_at=now,
+            is_active=True,
+        )
+
+
+class FakeMessageRepository:
+    def __init__(self, conn):
+        self.conn = conn
+
+    async def add_conversation_message(
+        self,
+        session_id: uuid.UUID,
+        role: MessageRole,
+        content: str,
+        **kwargs,
+    ) -> ConversationMessage:
+        return ConversationMessage(
+            id=uuid.uuid4(),
+            session_id=session_id,
+            role=role,
+            content=content,
+            tools_used=kwargs.get("tools_used", []),
+            validation_result=None,
+            confidence_score=kwargs.get("confidence_score"),
+            processing_time_ms=None,
+            token_count=None,
+            message_metadata=kwargs.get("metadata", {}),
+        )
+
+
+# Patch repository classes
+repo_module.SessionRepository = FakeSessionRepository
+repo_module.MessageRepository = FakeMessageRepository
+agents_routes.SessionRepository = FakeSessionRepository
+agents_routes.MessageRepository = FakeMessageRepository
+
+# Override database connection dependency to avoid real DB calls
+@asynccontextmanager
+async def _dummy_connection():
+    class Dummy:
+        async def fetch(self, *args, **kwargs):
+            return []
+
+        async def fetchrow(self, *args, **kwargs):
+            return None
+
+        async def execute(self, *args, **kwargs):
+            return None
+
+        async def fetchval(self, *args, **kwargs):
+            return None
+
+    yield Dummy()
+
+app.dependency_overrides[dep.get_db_connection] = lambda: _dummy_connection()
+db_pool.initialize = AsyncMock()
+db_pool.close = AsyncMock()
+db_pool.acquire = _dummy_connection
+
+
+async def ingest_sample_data() -> None:
+    """Simulate ingestion of sample data."""
+    with open("sample_market_data.json", "r") as f:
+        data = json.load(f)
+    logger.info("Ingested %d market records", len(data))
+
+
+async def call_chat_endpoint(client: AsyncClient, role: str) -> Dict[str, Any]:
+    payload = {"message": f"Hello from {role}", "session_id": str(uuid.uuid4())}
+    resp = await client.post(f"/agents/{role}/chat", json=payload)
+    body = resp.json()
+    return {"status": resp.status_code, "body": body}
+
+
+async def run_suite(retries: int) -> List[Dict[str, Any]]:
+    results = []
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        await ingest_sample_data()
+        for endpoint in ["/health"]:
+            r = await client.get(endpoint)
+            results.append({"endpoint": endpoint, "status": r.status_code})
+
+        for role in ["investor", "developer", "buyer", "agent"]:
+            attempts = 0
+            success = False
+            while attempts <= retries and not success:
+                res = await call_chat_endpoint(client, role)
+                success = res["status"] == 200 and res["body"].get("assistant_message_id")
+                attempts += 1
+            res["attempts"] = attempts
+            res["role"] = role
+            results.append(res)
+    return results
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--retries", type=int, default=1)
+    args = parser.parse_args()
+    results = asyncio.run(run_suite(args.retries))
+    print(json.dumps(results, indent=2))
+
+
+if __name__ == "__main__":
+    main()

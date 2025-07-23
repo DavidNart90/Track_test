@@ -4,6 +4,7 @@ Unit tests for the Developer Agent.
 import pytest
 import pytest
 from src.trackrealties.agents.developer import DeveloperAgent
+import uuid
 from src.trackrealties.agents.base import AgentResponse, AgentDependencies
 from unittest.mock import patch, create_autospec
 from src.trackrealties.rag.pipeline import RAGPipeline
@@ -29,7 +30,7 @@ async def test_developer_agent_run():
 
     agent = DeveloperAgent(deps=AgentDependencies(rag_pipeline=mock_rag_pipeline))
     query = "What are the zoning regulations for a property in Texas, TX?"
-    session_id = "test_session"
+    session_id = str(uuid.uuid4())
 
     # Act
     response = await agent.run(query, session_id)

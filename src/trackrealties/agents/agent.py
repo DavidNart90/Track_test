@@ -1,7 +1,8 @@
 """
 Agent-specific agent for the TrackRealties AI Platform.
 """
-from typing import List, Type, Optional
+from typing import List, Optional
+
 from .base import BaseAgent, AgentDependencies, BaseTool
 from .tools import (
     VectorSearchTool,
@@ -19,19 +20,15 @@ from .tools import (
 from .prompts import BASE_SYSTEM_CONTEXT, AGENT_SYSTEM_PROMPT
 
 
-
 class AgentAgent(BaseAgent):
     """Agent specializing in real estate agent tasks."""
 
-    def __init__(self, deps: Optional[AgentDependencies] = None):
-        tools = self._get_tools(deps)
-
-        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
-        model = role_models.get("agent") if role_models else None
-=======
     MODEL_PATH = "models/agent_llm"
 
     def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
+        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
+        model = role_models.get("agent") if role_models else None
+
         tools = [
             VectorSearchTool(deps=deps),
             GraphSearchTool(deps=deps),
@@ -40,8 +37,11 @@ class AgentAgent(BaseAgent):
             InvestmentOpportunityAnalysisTool(deps=deps),
             ROIProjectionTool(deps=deps),
             RiskAssessmentTool(deps=deps),
+            ZoningAnalysisTool(deps=deps),
+            ConstructionCostEstimationTool(deps=deps),
+            FeasibilityAnalysisTool(deps=deps),
+            SiteAnalysisTool(deps=deps),
         ]
-
         super().__init__(
             agent_name="agent_agent",
             model=model,

@@ -4,6 +4,7 @@ Unit tests for the Buyer Agent.
 import pytest
 import pytest
 from src.trackrealties.agents.buyer import BuyerAgent
+import uuid
 from src.trackrealties.agents.base import AgentResponse, AgentDependencies
 from unittest.mock import patch, create_autospec
 from src.trackrealties.rag.pipeline import RAGPipeline
@@ -29,7 +30,7 @@ async def test_buyer_agent_run():
 
     agent = BuyerAgent(deps=AgentDependencies(rag_pipeline=mock_rag_pipeline))
     query = "I'm looking for a 3 bedroom house in Texas, TX."
-    session_id = "test_session"
+    session_id = str(uuid.uuid4())
 
     # Act
     response = await agent.run(query, session_id)

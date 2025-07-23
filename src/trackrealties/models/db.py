@@ -47,7 +47,7 @@ class ConversationMessage(BaseModel):
     confidence_score: Optional[float] = Field(None, ge=0, le=1)
     processing_time_ms: Optional[int] = None
     token_count: Optional[int] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    message_metadata: Dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
