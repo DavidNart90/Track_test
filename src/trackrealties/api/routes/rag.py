@@ -3,15 +3,15 @@ API endpoints for RAG search functionality.
 """
 
 import logging
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
 import time
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from ...models.search import QueryRequest, SearchRequest, SearchResponse, SearchResult
+from ...rag.entity_extractor import EntityExtractor
+from ...rag.rag_pipeline_integration import EnhancedRAGPipeline
 from ...rag.router import QueryRouter
 from ...rag.synthesizer import ResponseSynthesizer
-from ...rag.entity_extractor import EntityExtractor
-from rag_pipeline_integration import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -25,10 +25,11 @@ async def get_search_engine() -> EnhancedRAGPipeline:
         await pipeline.initialize()
     return pipeline
 
+
 @router.post("/search", response_model=SearchResponse)
 async def search(
     request: SearchRequest,
-    search_engine: EnhancedRAGPipeline = Depends(get_search_engine)
+    search_engine: EnhancedRAGPipeline = Depends(get_search_engine),
 ):
     """
     Perform a search using the RAG engine.
@@ -36,13 +37,13 @@ async def search(
     start_time = time.time()
     try:
         logger.info(f"Performing search for query: {request.query}")
-        
-        results: List[SearchResult] = await search_engine.search(
+
+        results: list[SearchResult] = await search_engine.search(
             query=request.query,
             limit=request.limit,
             filters=request.filters,
         )
-        
+
         end_time = time.time()
         search_time_ms = int((end_time - start_time) * 1000)
 
@@ -53,11 +54,13 @@ async def search(
             total_results=len(results),
             search_time_ms=search_time_ms,
             filters_applied=request.filters,
-            sources_searched=["vector_db", "graph_db"], # Placeholder
+            sources_searched=["vector_db", "graph_db"],  # Placeholder
         )
     except Exception as e:
         logger.error(f"Error during search: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="An error occurred during the search.")
+        raise HTTPException(
+            status_code=500, detail="An error occurred during the search."
+        ) from e
 
 
 @router.post("/query", response_model=SearchResponse)
@@ -81,7 +84,7 @@ async def intelligent_query(
         logger.info(f"Routed query to strategy: {search_strategy}")
 
         # Perform search using the chosen strategy
-        search_results: List[SearchResult] = await search_engine.search(
+        search_results: list[SearchResult] = await search_engine.search(
             query=request.query
         )
 
@@ -114,7 +117,9 @@ async def intelligent_query(
         )
     except Exception as e:
         logger.error(f"Error during intelligent query: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="An error occurred during the query.")
+        raise HTTPException(
+            status_code=500, detail="An error occurred during the query."
+        ) from e
 
 
 @router.post("/query-router")
@@ -128,4 +133,4 @@ async def query_router_diagnostics(request: QueryRequest):
         return {"strategy": strategy, "entities": entities}
     except Exception as e:
         logger.error(f"Query router diagnostics failed: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Failed to analyze query")
+        raise HTTPException(status_code=500, detail="Failed to analyze query") from e
