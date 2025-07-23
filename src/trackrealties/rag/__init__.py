@@ -8,6 +8,12 @@ from .search import VectorSearch, GraphSearch, HybridSearchEngine
 from .router import QueryRouter
 from .synthesizer import ResponseSynthesizer
 from .validation import RealEstateHallucinationDetector
+from .smart_search import (
+    SmartSearchRouter,
+    FixedGraphSearch,
+    SearchStrategy,
+    RealEstateEntityExtractor,
+)
 
 __all__ = [
     'VectorSearch',
@@ -16,4 +22,8 @@ __all__ = [
     'QueryRouter',
     'ResponseSynthesizer',
     'RealEstateHallucinationDetector',
+    'SmartSearchRouter',
+    'FixedGraphSearch',
+    'SearchStrategy',
+    'RealEstateEntityExtractor',
 ]
