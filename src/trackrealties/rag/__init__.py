@@ -7,7 +7,7 @@ This module provides intelligent search and context-aware responses for real est
 from .search import VectorSearch, GraphSearch, HybridSearchEngine
 from .router import QueryRouter
 from .synthesizer import ResponseSynthesizer
-from .validation import RealEstateHallucinationDetector
+from ..validation import RealEstateHallucinationDetector
 
 __all__ = [
     'VectorSearch',

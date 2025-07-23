@@ -7,7 +7,7 @@ from src.trackrealties.core.database import db_pool
 
 from src.trackrealties.agents.context import ContextManager
 from src.trackrealties.rag.enhanced_rag_pipeline import TrackRealitiesEnhancedRAG
-from src.trackrealties.rag.validation import RealEstateHallucinationDetector
+from src.trackrealties.validation.hallucination import RealEstateHallucinationDetector
 
 @pytest.fixture(scope="function", autouse=True)
 async def initialize_db_pool(monkeypatch):
