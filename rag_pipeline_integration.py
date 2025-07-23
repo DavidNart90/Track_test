@@ -13,7 +13,7 @@ from src.trackrealties.core.graph import graph_manager
 from src.trackrealties.core.database import db_pool
 from src.trackrealties.models.search import SearchResult
 from src.trackrealties.analytics.search import search_analytics, SearchAnalytics
-from smart_search_implementation import (
+from src.trackrealties.rag.smart_search import (
     SmartSearchRouter,
     FixedGraphSearch,
     SearchStrategy,

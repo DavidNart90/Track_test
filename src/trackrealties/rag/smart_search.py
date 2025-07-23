@@ -527,28 +527,3 @@ class FixedGraphSearch:
             )
             return await result.data()
 
-
-# Example usage and testing
-async def test_smart_search_router():
-    """
-    Test the smart search router with various query types
-    """
-    router = SmartSearchRouter()
-    
-    test_queries = [
-        "What is the median price in Dallas, TX?",  # Should route to GRAPH_ONLY
-        "Should I invest in Austin real estate?",   # Should route to HYBRID
-        "Tell me about market trends in Texas",     # Should route to VECTOR_ONLY
-        "Who is the agent for property 123-456?",  # Should route to GRAPH_ONLY
-        "Compare Austin vs Dallas markets",         # Should route to HYBRID
-        "Find me properties under $400K in Houston", # Should route to HYBRID
-    ]
-    
-    for query in test_queries:
-        strategy = await router.route_search(query)
-        print(f"Query: '{query}' -> Strategy: {strategy}")
-
-
-if __name__ == "__main__":
-    # Run the test
-    asyncio.run(test_smart_search_router())

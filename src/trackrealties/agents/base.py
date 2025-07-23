@@ -153,7 +153,6 @@ class BaseAgent(ABC):
 
             # Persist updated context
             self.dependencies.context_manager.update_context(session_id, context)
-            # Planning-for-Phase-2-Docs
 
             if self.validator:
                 extra = await self.validator.validate_response(
