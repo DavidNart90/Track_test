@@ -5,19 +5,29 @@ This module provides intelligent search and context-aware responses for real est
 """
 
 from .rag_pipeline_integration import EnhancedRAGPipeline
+from .search import VectorSearch, GraphSearch, HybridSearchEngine
 from .router import QueryRouter
-from .search import GraphSearch, HybridSearchEngine, VectorSearch
 from .synthesizer import ResponseSynthesizer
 from .validation import RealEstateHallucinationDetector
 from ..validation import RealEstateHallucinationDetector
+from .smart_search import (
+    SmartSearchRouter,
+    FixedGraphSearch,
+    SearchStrategy,
+    RealEstateEntityExtractor,
+)
 
 
 __all__ = [
     "VectorSearch",
-    "GraphSearch",
-    "HybridSearchEngine",
+    'GraphSearch',
+    'HybridSearchEngine',
+    'QueryRouter',
     "EnhancedRAGPipeline",
-    "QueryRouter",
     "ResponseSynthesizer",
-    "RealEstateHallucinationDetector",
+    'RealEstateHallucinationDetector',
+    'SmartSearchRouter',
+    'FixedGraphSearch',
+    'SearchStrategy',
+    'RealEstateEntityExtractor',
 ]
