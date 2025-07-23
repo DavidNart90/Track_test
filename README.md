@@ -56,11 +56,11 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
     *   The application provides a CLI for ingesting data from JSON files.
     *   **Ingest property listings:**
         ```bash
-        python -m src.trackrealties.cli enhanced-ingest sample_property_listings.json --data-type property
+        python -m src.trackrealties.cli enhanced-ingest examples/sample_property_listings.json --data-type property
         ```
     *   **Ingest market data:**
         ```bash
-        python -m src.trackrealties.cli enhanced-ingest sample_market_data.json --data-type market
+        python -m src.trackrealties.cli enhanced-ingest examples/sample_market_data.json --data-type market
         ```
     *   This will chunk the data, generate embeddings using OpenAI's `text-embedding-3-small` model, and store the data in the PostgreSQL and Neo4j databases.
 
