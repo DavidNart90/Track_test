@@ -81,6 +81,15 @@ The repository includes scripts for creating training datasets and fine-tuning s
     Each model will be saved under `models/{role}_llm/`.
 
 The application loads these models automatically when creating agents.
+### Key Features
+
+* **Intelligent Query Router** – Analyzes queries with entity extraction and intent classification to choose vector, graph or hybrid search. Diagnostics are available via `POST /rag/query-router`.
+* **Conversation Sessions and Context** – The `ContextManager` stores messages and exposes CRUD helpers. Context can be viewed or cleared with `/conversations/context/{session_id}`.
+* **Role-Specific Models and Prompts** – Agents load fine-tuned models for their role and share standardized prompt templates.
+* **Hallucination Detection** – `RealEstateHallucinationDetector` flags unrealistic values and attaches validation results to each response.
+* **Search Analytics** – `SearchAnalytics` logs strategy usage and performance. Metrics can be retrieved from `GET /analytics/search-report`.
+* **End-to-End Testing** – Automated tests ingest sample data and exercise the API, confirming conversation logging works.
+
 
 ### Running the Application
 
