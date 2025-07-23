@@ -74,18 +74,18 @@ class MessageRepository:
         confidence_score: Optional[float] = None,
         processing_time_ms: Optional[int] = None,
         token_count: Optional[int] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        message_metadata: Optional[Dict[str, Any]] = None
     ) -> ConversationMessage:
         """Adds a message to the conversation_messages table."""
         row = await self.conn.fetchrow(
             """
             INSERT INTO conversation_messages (
                 session_id, role, content, tools_used, validation_result,
-                confidence_score, processing_time_ms, token_count, metadata
+                confidence_score, processing_time_ms, token_count, message_metadata
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-            RETURNING id, session_id, role, content, tools_used, validation_result, confidence_score, 
-                      processing_time_ms, token_count, metadata, created_at
+            RETURNING id, session_id, role, content, tools_used, validation_result, confidence_score,
+                      processing_time_ms, token_count, message_metadata, created_at
             """,
             session_id,
             role.value if isinstance(role, Enum) else role,
@@ -95,12 +95,12 @@ class MessageRepository:
             confidence_score,
             processing_time_ms,
             token_count,
-            json.dumps(metadata or {})
+            json.dumps(message_metadata or {})
         )
         data = dict(row)
         data['tools_used'] = json.loads(data['tools_used'])
-        if data.get('metadata'):
-            data['metadata'] = json.loads(data['metadata'])
+        if data.get('message_metadata'):
+            data['message_metadata'] = json.loads(data['message_metadata'])
         return ConversationMessage(**data)
 
     async def get_conversation_history(
@@ -111,7 +111,7 @@ class MessageRepository:
         """Retrieves the recent conversation history for a session."""
         rows = await self.conn.fetch(
             """
-            SELECT id, session_id, role, content, created_at, metadata, tools_used
+            SELECT id, session_id, role, content, created_at, message_metadata, tools_used
             FROM conversation_messages
             WHERE session_id = $1
             ORDER BY created_at DESC
@@ -126,6 +126,6 @@ class MessageRepository:
         data = dict(row)
         if data.get('tools_used') and isinstance(data['tools_used'], str):
             data['tools_used'] = json.loads(data['tools_used'])
-        if data.get('metadata') and isinstance(data['metadata'], str):
-            data['metadata'] = json.loads(data['metadata'])
+        if data.get('message_metadata') and isinstance(data['message_metadata'], str):
+            data['message_metadata'] = json.loads(data['message_metadata'])
         return data

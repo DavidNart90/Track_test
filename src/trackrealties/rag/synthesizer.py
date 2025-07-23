@@ -42,6 +42,11 @@ class ResponseSynthesizer:
         Returns:
             str: A formatted response string.
         """
+        normalized = query.lower().strip()
+        greetings = {"hi", "hello", "hey", "hi agent", "hello agent", "hey agent"}
+        if normalized in greetings:
+            return "Hello! How can I assist you with real estate today?"
+
         if not search_results:
             return f"No relevant information found for your query: '{query}'"
 

@@ -15,16 +15,13 @@ from .prompts import BASE_SYSTEM_CONTEXT, INVESTOR_SYSTEM_PROMPT
 
 class InvestorAgent(BaseAgent):
     """Agent specializing in real estate investor tasks."""
-    def __init__(self, deps: Optional[AgentDependencies] = None):
-        tools = self._get_tools(deps)
 
-        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
-        model = role_models.get("investor") if role_models else None
-
-=======
     MODEL_PATH = "models/investor_llm"
 
     def __init__(self, deps: Optional[AgentDependencies] = None, model_path: Optional[str] = None):
+        role_models = getattr(deps.rag_pipeline, "role_models", {}) if deps else {}
+        model = role_models.get("investor") if role_models else None
+
         tools = [
             VectorSearchTool(deps=deps),
             GraphSearchTool(deps=deps),

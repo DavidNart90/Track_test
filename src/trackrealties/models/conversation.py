@@ -35,7 +35,9 @@ class ConversationMessage(Base):
     confidence_score = Column(Numeric(3, 2), nullable=True)
     processing_time_ms = Column(Integer, nullable=True)
     token_count = Column(Integer, nullable=True)
-    metadata = Column(JSONB, nullable=False, server_default=text("'{}'::jsonb"))
+    message_metadata = Column(
+        JSONB, nullable=False, server_default=text("'{}'::jsonb")
+    )
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (
@@ -55,7 +57,7 @@ class MessageCreateRequest(BaseModel):
     confidence_score: float | None = Field(None, ge=0, le=1)
     processing_time_ms: int | None = None
     token_count: int | None = None
-    metadata: dict[str, Any] | None = Field(default_factory=dict)
+    message_metadata: dict[str, Any] | None = Field(default_factory=dict)
 
 
 class MessageUpdateRequest(BaseModel):
@@ -63,7 +65,7 @@ class MessageUpdateRequest(BaseModel):
     tools_used: list[dict[str, Any]] | None = None
     validation_result: dict[str, Any] | None = None
     confidence_score: float | None = Field(None, ge=0, le=1)
-    metadata: dict[str, Any] | None = None
+    message_metadata: dict[str, Any] | None = None
 
 
 class ConversationMessageResponse(BaseModel):
@@ -76,7 +78,7 @@ class ConversationMessageResponse(BaseModel):
     confidence_score: float | None
     processing_time_ms: int | None
     token_count: int | None
-    metadata: dict[str, Any]
+    message_metadata: dict[str, Any]
     created_at: datetime
 
     class Config:
