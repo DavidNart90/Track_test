@@ -8,12 +8,42 @@ The application is built around a set of specialized AI agents, each tailored to
 
 The application is built with FastAPI with Pydantic AI and uses a PostgreSQL database to store session and conversation data, and a Neo4j database to store the knowledge graph.
 
+### System Flow
+```mermaid
+flowchart TD
+    subgraph Ingestion
+        A[JSON Data] --> B[CLI Ingestion]
+        B --> C[Chunk & Embed]
+        C --> D[(PostgreSQL)]
+        C --> E[(Neo4j)]
+    end
+    subgraph Query
+        F[User Query] --> G[FastAPI API]
+        G --> H[Context Manager]
+        H --> I[Intelligent Router]
+        I -->|Vector| J[Vector Search]
+        I -->|Graph| K[Graph Search]
+        I -->|Hybrid| L[Hybrid Search]
+        J --> D
+        K --> E
+        L --> J
+        L --> K
+        J --> M[Results]
+        K --> M
+        L --> M
+        M --> N[Response Synthesizer]
+        N --> O[Hallucination Detector]
+        O --> P[Agent Response]
+    end
+    P --> H
+```
+
 ## Getting Started
 
 ### Prerequisites
 
 *   Python 3.11+
-*   Poetry for dependency management
+*   Use `pip` to install dependencies on Windows
 *   PostgreSQL database (Neon DB is recommended)
 *   Neo4j database
 
@@ -27,7 +57,7 @@ The application is built with FastAPI with Pydantic AI and uses a PostgreSQL dat
 
 2.  **Install dependencies:**
     ```bash
-    poetry install
+    py -m pip install -r requirements.txt
     ```
 
 3.  **Set up the databases:**
@@ -96,7 +126,7 @@ The application loads these models automatically when creating agents.
 To run the application, use the following command:
 
 ```bash
-poetry run uvicorn src.trackrealties.api.main:app --reload
+py -m uvicorn src.trackrealties.api.main:app --reload
 ```
 
 The API will be available at `http://localhost:8000`.
@@ -184,3 +214,7 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 *   **`POST /rag/search`**: Perform a search using the RAG engine.
 *   **`POST /rag/query`**: Perform an intelligent search using a query router.
 *   **`POST /rag/query-router`**: Get router diagnostics (strategy and entities) for a query.
+
+## Architecture Overview
+
+TrackRealties AI ingests property and market data into PostgreSQL and Neo4j. The FastAPI service routes each user query through an intelligent router that selects vector, graph or hybrid search. Results are synthesized and validated before agents respond, and conversation context is stored for later use.
