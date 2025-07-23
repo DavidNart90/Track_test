@@ -8,8 +8,7 @@ from .rag_pipeline_integration import EnhancedRAGPipeline
 from .search import VectorSearch, GraphSearch, HybridSearchEngine
 from .router import QueryRouter
 from .synthesizer import ResponseSynthesizer
-from .validation import RealEstateHallucinationDetector
-from ..validation import RealEstateHallucinationDetector
+from ..validation.hallucination import RealEstateHallucinationDetector
 from .smart_search import (
     SmartSearchRouter,
     FixedGraphSearch,

@@ -8,26 +8,62 @@ The application is built around a set of specialized AI agents, each tailored to
 
 The application is built with FastAPI with Pydantic AI and uses a PostgreSQL database to store session and conversation data, and a Neo4j database to store the knowledge graph.
 
+### System Flow
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           TrackRealties AI Platform                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                             Ingestion Layer                                  │
+│  ┌─────────────────────┐  ┌───────────────────────────────────────────────┐ │
+│  │   JSON & CSV Files  │  │   CLI Chunking & Embedding                    │ │
+│  └─────────────────────┘  └───────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                               API Gateway                                    │
+│  ┌─────────────────────┐                                                   │
+│  │     FastAPI         │                                                   │
+│  └─────────────────────┘                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                        Agent Orchestration & Search                          │
+│  ┌─────────────────────┐  ┌───────────────────────┐  ┌────────────────────┐ │
+│  │  Context Manager    │  │  Intelligent Router   │  │ Role-Specific Agents│ │
+│  └─────────────────────┘  └───────┬───────────────┘  └────────────────────┘ │
+│                                    │                                        │
+│            ┌────────────┬──────────┴──────────┬──────────────┐              │
+│            │ VectorSearch│  GraphSearch       │   Hybrid     │              │
+│            └──────┬──────┴──────────┬─────────┴──────────────┘              │
+│                   │                 │                                     │
+│                   └──────────┬──────┴─────────────┬───────────────────────┘
+│                              │                    │                          
+│                              ▼                    ▼                         
+│                       Response Synthesizer   Hallucination Detector         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                             Data Storage Layer                               │
+│  ┌─────────────────────┐  ┌─────────────────────┐                           │
+│  │ PostgreSQL + pgvector│ │     Neo4j Graph DB  │                           │
+│  └─────────────────────┘  └─────────────────────┘                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ## Getting Started
 
 ### Prerequisites
 
 *   Python 3.11+
-*   Poetry for dependency management
+*   Use `pip` to install dependencies on Windows
 *   PostgreSQL database (Neon DB is recommended)
 *   Neo4j database
 
 ### Installation
 
 1.  **Clone the repository:**
-    ```bash
+    ```powershell
     git clone https://github.com/your-username/trackrealties-ai.git
     cd trackrealties-ai
     ```
 
 2.  **Install dependencies:**
-    ```bash
-    poetry install
+    ```powershell
+    py -m pip install -r requirements.txt
     ```
 
 3.  **Set up the databases:**
@@ -48,18 +84,18 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
 1.  **Clear existing data (optional):**
     *   If you want to start with a clean slate, you can run the following command to clear all data from the database tables.
     *   **Warning:** This will permanently delete all data in the tables.
-    ```bash
+    ```powershell
     python check_and_clear_data.py
     ```
 
 2.  **Ingest data:**
     *   The application provides a CLI for ingesting data from JSON files.
     *   **Ingest property listings:**
-        ```bash
+        ```powershell
         python -m src.trackrealties.cli enhanced-ingest sample_property_listings.json --data-type property
         ```
     *   **Ingest market data:**
-        ```bash
+        ```powershell
         python -m src.trackrealties.cli enhanced-ingest sample_market_data.json --data-type market
         ```
     *   This will chunk the data, generate embeddings using OpenAI's `text-embedding-3-small` model, and store the data in the PostgreSQL and Neo4j databases.
@@ -69,13 +105,13 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
 The repository includes scripts for creating training datasets and fine-tuning small language models for each user role.
 
 1. **Prepare the training data**
-    ```bash
+    ```powershell
     python scripts/prepare_training_data.py
     ```
     This generates JSONL files under `training_data/` for investor, developer, buyer and agent roles.
 
 2. **Fine-tune the models**
-    ```bash
+    ```powershell
     python scripts/fine_tune_models.py
     ```
     Each model will be saved under `models/{role}_llm/`.
@@ -95,8 +131,8 @@ The application loads these models automatically when creating agents.
 
 To run the application, use the following command:
 
-```bash
-poetry run uvicorn src.trackrealties.api.main:app --reload
+```powershell
+py -m uvicorn src.trackrealties.api.main:app --reload
 ```
 
 The API will be available at `http://localhost:8000`.
@@ -184,3 +220,7 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 *   **`POST /rag/search`**: Perform a search using the RAG engine.
 *   **`POST /rag/query`**: Perform an intelligent search using a query router.
 *   **`POST /rag/query-router`**: Get router diagnostics (strategy and entities) for a query.
+
+## Architecture Overview
+
+TrackRealties AI ingests property and market data into PostgreSQL and Neo4j. The FastAPI service routes each user query through an intelligent router that selects vector, graph or hybrid search. Results are synthesized and validated before agents respond, and conversation context is stored for later use.
