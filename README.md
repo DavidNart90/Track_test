@@ -83,12 +83,12 @@ The repository includes scripts for creating training datasets and fine-tuning s
 The application loads these models automatically when creating agents.
 ### Key Features
 
-* **Intelligent Query Router** – Analyzes queries with entity extraction and intent classification to choose vector, graph or hybrid search. Diagnostics are available via `POST /rag/query-router`.
-* **Conversation Sessions and Context** – The `ContextManager` stores messages and exposes CRUD helpers. Context can be viewed or cleared with `/conversations/context/{session_id}`.
-* **Role-Specific Models and Prompts** – Agents load fine-tuned models for their role and share standardized prompt templates.
-* **Hallucination Detection** – `RealEstateHallucinationDetector` flags unrealistic values and attaches validation results to each response.
-* **Search Analytics** – `SearchAnalytics` logs strategy usage and performance. Metrics can be retrieved from `GET /analytics/search-report`.
-* **End-to-End Testing** – Automated tests ingest sample data and exercise the API, confirming conversation logging works.
+* **Intelligent Query Router** – Extracts entities, classifies intent and routes queries to vector, graph or hybrid search strategies. Diagnostics are available from `POST /rag/query-router`.
+* **Conversation Context** – The `ContextManager` saves each message and provides CRUD helpers. Stored context can be viewed or cleared via `/conversations/context/{session_id}`.
+* **Role-Specific Models and Prompts** – Agents automatically load their fine-tuned models and use shared prompt templates.
+* **Hallucination Detection** – `RealEstateHallucinationDetector` validates responses and flags unrealistic figures.
+* **Search Analytics** – `SearchAnalytics` records strategy usage and response times. Metrics are available from `GET /analytics/search-report`.
+* **End-to-End Tests** – `scripts/e2e_test_suite.py` ingests sample data, calls the API and confirms messages are logged correctly.
 
 
 ### Running the Application
