@@ -6,7 +6,7 @@ This report summarizes the automated end-to-end tests executed for the TrackReal
 ## Test Environment
 - **Database**: PostgreSQL (Neon) and Neo4j (environment variables provided).
 - **Model**: OpenAI GPT via Pydantic AI.
-- **Data**: `sample_market_data.json` and `sample_property_listings.json`.
+- **Data**: `examples/sample_market_data.json` and `examples/sample_property_listings.json`.
 - **Commands Executed**:
   - `pytest -q`
   - `PYTHONPATH=. python scripts/e2e_test_suite.py --retries 1 --output report.json`
@@ -42,11 +42,11 @@ All requests return HTTP 200 and include an `assistant_message_id` confirming me
    - Prepare the schema using `sql/new_schema.sql`.
    - Ingest properties:
      ```bash
-     python -m src.trackrealties.cli enhanced-ingest sample_property_listings.json --data-type property
+     python -m src.trackrealties.cli enhanced-ingest examples/sample_property_listings.json --data-type property
      ```
    - Ingest market data:
      ```bash
-     python -m src.trackrealties.cli enhanced-ingest sample_market_data.json --data-type market
+     python -m src.trackrealties.cli enhanced-ingest examples/sample_market_data.json --data-type market
      ```
 2. **API Calls**
    - Create a session via `POST /session/`.

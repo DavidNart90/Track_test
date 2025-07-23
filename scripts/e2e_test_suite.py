@@ -117,9 +117,9 @@ db_pool.acquire = _dummy_connection
 
 async def ingest_sample_data() -> None:
     """Simulate ingestion of sample data."""
-    with open("sample_market_data.json", "r") as f:
+    with open("examples/sample_market_data.json", "r") as f:
         market = json.load(f)
-    with open("sample_property_listings.json", "r") as f:
+    with open("examples/sample_property_listings.json", "r") as f:
         listings = json.load(f)
     logger.info("Ingested %d market records and %d listings", len(market), len(listings))
 

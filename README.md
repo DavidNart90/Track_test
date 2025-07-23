@@ -4,9 +4,21 @@ TrackRealties AI is a RAG (Retrieval-Augmented Generation) application for real 
 
 ## How it Works
 
-The application is built around a set of specialized AI agents, each tailored to a specific real estate role. These agents use a combination of a RAG pipeline and a set of tools to answer user queries. The RAG pipeline provides the agents with relevant information from a knowledge base, and the tools allow the agents to perform specific actions, such as searching for properties or analyzing market data.
+The application is built around a set of specialized AI agents, each tailored to a specific real estate role. These agents use a combination of a RAG pipeline and a set of tools to answer user queries. The pipeline retrieves information from a knowledge base while the tools perform actions such as property searches or market analysis.
 
 The application is built with FastAPI with Pydantic AI and uses a PostgreSQL database to store session and conversation data, and a Neo4j database to store the knowledge graph.
+
+### Intelligent Query Router
+
+Queries pass through an intelligent router that decides whether to perform a vector, graph or hybrid search. Diagnostics for each decision are available via the `/rag/query-router` endpoint.
+
+### Hallucination Detection
+
+Responses are validated by the `RealEstateHallucinationDetector` which flags unrealistic prices or percentages to improve reliability.
+
+### Search Analytics
+
+Every search is logged and aggregated metrics can be retrieved from the `/analytics/search-report` endpoint.
 
 ## Getting Started
 
@@ -54,13 +66,14 @@ The ingestion layer is responsible for populating the PostgreSQL and Neo4j datab
 
 2.  **Ingest data:**
     *   The application provides a CLI for ingesting data from JSON files.
+    *   Example datasets are located in the `examples/` directory.
     *   **Ingest property listings:**
         ```bash
-        python -m src.trackrealties.cli enhanced-ingest sample_property_listings.json --data-type property
+        python -m src.trackrealties.cli enhanced-ingest examples/sample_property_listings.json --data-type property
         ```
     *   **Ingest market data:**
         ```bash
-        python -m src.trackrealties.cli enhanced-ingest sample_market_data.json --data-type market
+        python -m src.trackrealties.cli enhanced-ingest examples/sample_market_data.json --data-type market
         ```
     *   This will chunk the data, generate embeddings using OpenAI's `text-embedding-3-small` model, and store the data in the PostgreSQL and Neo4j databases.
 
@@ -72,13 +85,13 @@ The repository includes scripts for creating training datasets and fine-tuning s
     ```bash
     python scripts/prepare_training_data.py
     ```
-    This generates JSONL files under `training_data/` for investor, developer, buyer and agent roles.
+    This generates JSONL files under `training_data/` for investor, developer, buyer and agent roles. You can edit these files to add or adjust examples before fine‑tuning.
 
 2. **Fine-tune the models**
     ```bash
     python scripts/fine_tune_models.py
     ```
-    Each model will be saved under `models/{role}_llm/`.
+    Each model will be saved under `models/{role}_llm/`. Run this script again whenever you update the training data to create improved role models.
 
 The application loads these models automatically when creating agents.
 
@@ -144,6 +157,7 @@ The API is documented with Swagger UI, which is available at `http://localhost:8
 ### Analytics
 
 *   **`GET /analytics/cma/{property_id}`**: Generate a Comparative Market Analysis (CMA) for a given property.
+*   **`GET /analytics/search-report`**: Get aggregated search analytics metrics.
 
 ### Conversation
 

@@ -9,6 +9,8 @@ from .router import QueryRouter
 from .search import GraphSearch, HybridSearchEngine, VectorSearch
 from .synthesizer import ResponseSynthesizer
 from .validation import RealEstateHallucinationDetector
+from ..validation import RealEstateHallucinationDetector
+
 
 __all__ = [
     "VectorSearch",

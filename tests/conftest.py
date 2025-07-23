@@ -1,37 +1,12 @@
 import os
 os.environ.setdefault("DATABASE_URL", "postgresql://test@test/testdb")
-from contextlib import asynccontextmanager
 
 import pytest
 from src.trackrealties.core.database import db_pool
 
 from src.trackrealties.agents.context import ContextManager
 from src.trackrealties.rag.enhanced_rag_pipeline import TrackRealitiesEnhancedRAG
-from src.trackrealties.rag.validation import RealEstateHallucinationDetector
-
-@pytest.fixture(scope="function", autouse=True)
-async def initialize_db_pool(monkeypatch):
-    """Mock database pool initialization for tests."""
-    async def _noop():
-        return None
-
-    @asynccontextmanager
-    async def _fake_acquire():
-        class Dummy:
-            async def fetch(self, *args, **kwargs):
-                return []
-
-            async def fetchrow(self, *args, **kwargs):
-                return None
-
-            async def execute(self, *args, **kwargs):
-                return None
-
-        yield Dummy()
-
-    monkeypatch.setattr(db_pool, "initialize", _noop)
-    monkeypatch.setattr(db_pool, "close", _noop)
-    monkeypatch.setattr(db_pool, "acquire", _fake_acquire)
+from src.trackrealties.validation.hallucination import RealEstateHallucinationDetector
 
 from unittest.mock import AsyncMock
 

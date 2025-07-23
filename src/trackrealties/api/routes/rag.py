@@ -8,10 +8,16 @@ import time
 from fastapi import APIRouter, Depends, HTTPException
 
 from ...models.search import QueryRequest, SearchRequest, SearchResponse, SearchResult
+
 from ...rag.entity_extractor import EntityExtractor
 from ...rag.rag_pipeline_integration import EnhancedRAGPipeline
 from ...rag.router import QueryRouter
 from ...rag.synthesizer import ResponseSynthesizer
+
+from ...rag.router import QueryRouter
+from ...rag.synthesizer import ResponseSynthesizer
+from ...rag.entity_extractor import EntityExtractor
+from ...rag.optimized_pipeline import EnhancedRAGPipeline
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

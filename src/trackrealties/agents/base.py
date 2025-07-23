@@ -13,6 +13,9 @@ from pydantic_ai.providers.openai import OpenAIProvider as OpenAI
 
 from ..core.config import settings
 from ..models.agent import ValidationResult
+from pydantic_ai.models.openai import OpenAIModel
+from ..rag.pipeline import RAGPipeline
+from ..rag.optimized_pipeline import EnhancedRAGPipeline
 from ..models.db import ConversationMessage, MessageRole
 from ..rag.pipeline import RAGPipeline
 from ..rag.rag_pipeline_integration import EnhancedRAGPipeline
