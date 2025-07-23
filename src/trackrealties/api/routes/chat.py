@@ -43,7 +43,7 @@ async def chat(
             session_id=session_id,
             role=MessageRole.ASSISTANT,
             content=agent_response.content,
-            metadata={"tools_used": agent_response.tools_used}
+            message_metadata={"tools_used": agent_response.tools_used}
         )
 
         return ChatResponse(
@@ -95,7 +95,7 @@ async def chat_stream(
                 session_id=session_id,
                 role=MessageRole.ASSISTANT,
                 content=full_response,
-                metadata={"streamed": True}
+                message_metadata={"streamed": True}
             )
             
             yield f"data: {json.dumps(StreamDelta(type='end', content=None).dict())}\n\n"

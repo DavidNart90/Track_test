@@ -81,7 +81,7 @@ class FakeMessageRepository:
             confidence_score=kwargs.get("confidence_score"),
             processing_time_ms=None,
             token_count=None,
-            message_metadata=kwargs.get("metadata", {}),
+            message_metadata=kwargs.get("message_metadata", kwargs.get("metadata", {})),
         )
 
 

@@ -528,7 +528,12 @@ class EnhancedRAGPipeline:
         """
         if not self.initialized:
             await self.initialize()
-        
+
+        normalized = query.lower().strip()
+        greetings = {"hi", "hello", "hey", "hi agent", "hello agent", "hey agent"}
+        if normalized in greetings:
+            return []
+
         try:
             start_time = datetime.utcnow()
 
