@@ -4,6 +4,7 @@ Replace existing search.py implementation with optimized routing
 """
 
 import logging
+import asyncio
 
 from datetime import datetime
 from typing import List, Dict, Any, Optional

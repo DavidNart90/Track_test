@@ -12,7 +12,7 @@ This report summarizes the automated end-to-end tests executed for the TrackReal
   - `PYTHONPATH=. python scripts/e2e_test_suite.py --retries 1`
 
 ## Results
-The test suite hit the health endpoint and sent a chat request to each agent role. Initial runs used simple greetings to confirm that greetings bypass expensive search. A second run sent questions derived from the sample data. Because outbound network access is restricted, vector and graph searches failed and responses fell back to "No relevant information found". Example output:
+The test suite hit the health endpoint and sent a chat request to each agent role. Initial runs used simple greetings to confirm that greetings bypass expensive search. Subsequent runs issued advanced questions drawn from the sample data, such as ROI calculations and listing‑agent lookups. Because outbound network access is restricted, the vector and graph searches could not connect to OpenAI or Neo4j and the responses fell back to "No relevant information found". Example output:
 
 ```
 [
@@ -58,5 +58,6 @@ All requests returned HTTP 200 and included an `assistant_message_id` confirming
 - Graph search could not reach the Neo4j database due to network restrictions.
 - Simple greetings now return a friendly message without performing a search.
 - Advanced property and market queries fell back to a default message because search results were empty.
+- Fixed a bug in the hybrid search engine by importing `asyncio` so the pipeline no longer raises a NameError.
 - All conversation messages are stored in the `conversation_messages` table with the new `message_metadata` field.
 
