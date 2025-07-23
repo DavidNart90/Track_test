@@ -9,10 +9,10 @@ This report summarizes the automated end-to-end tests executed for the TrackReal
 - **Data**: `sample_market_data.json` and `sample_property_listings.json`.
 - **Commands Executed**:
   - `pytest -q`
-  - `PYTHONPATH=. python scripts/e2e_test_suite.py --retries 1`
+  - `PYTHONPATH=. python scripts/e2e_test_suite.py --retries 1 --output report.json`
 
 ## Results
-The test suite hit the health endpoint and sent a chat request to each agent role. Initial runs used simple greetings to confirm that greetings bypass expensive search. Subsequent runs issued advanced questions drawn from the sample data, such as ROI calculations and listing‑agent lookups. Because outbound network access is restricted, the vector and graph searches could not connect to OpenAI or Neo4j and the responses fell back to "No relevant information found". Example output:
+The test suite hits the health endpoint and sends a chat request to each agent role. Initial runs used simple greetings to confirm that greetings bypass expensive search. Subsequent runs issue advanced questions drawn from the sample data, such as ROI calculations and listing‑agent lookups. Because outbound network access is restricted, the vector and graph searches cannot connect to OpenAI or Neo4j and the responses fall back to "No relevant information found." Example output:
 
 ```
 [
@@ -35,7 +35,7 @@ The test suite hit the health endpoint and sent a chat request to each agent rol
 ]
 ```
 
-All requests returned HTTP 200 and included an `assistant_message_id` confirming messages are logged correctly.
+All requests return HTTP 200 and include an `assistant_message_id` confirming messages are logged correctly. The suite now writes results to a JSON file when `--output` is provided and logs an error if a response cannot be decoded as JSON.
 
 ## Usage Guide
 1. **Data Ingestion**

@@ -135,7 +135,11 @@ queries = {
 async def call_chat_endpoint(client: AsyncClient, role: str) -> Dict[str, Any]:
     payload = {"message": queries[role], "session_id": str(uuid.uuid4())}
     resp = await client.post(f"/agents/{role}/chat", json=payload)
-    body = resp.json()
+    try:
+        body = resp.json()
+    except Exception:
+        logger.error("Failed to decode JSON for role %s: %s", role, resp.text)
+        body = {"error": "invalid_json", "raw": resp.text}
     return {"status": resp.status_code, "body": body}
 
 
@@ -163,9 +167,14 @@ async def run_suite(retries: int) -> List[Dict[str, Any]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--retries", type=int, default=1)
+    parser.add_argument("--output", type=str, help="Path to save JSON results")
     args = parser.parse_args()
     results = asyncio.run(run_suite(args.retries))
-    print(json.dumps(results, indent=2))
+    output = json.dumps(results, indent=2)
+    if args.output:
+        with open(args.output, "w") as f:
+            f.write(output)
+    print(output)
 
 
 if __name__ == "__main__":
