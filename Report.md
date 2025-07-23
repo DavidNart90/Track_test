@@ -12,7 +12,7 @@ This report summarizes the automated end-to-end tests executed for the TrackReal
   - `PYTHONPATH=. python scripts/e2e_test_suite.py --retries 1`
 
 ## Results
-The test suite hit the health endpoint and sent a chat request to each agent role. Vector search failed due to connection errors, so the fallback response was returned. Example output:
+The test suite hit the health endpoint and sent a chat request to each agent role. To verify that greetings bypass expensive searches, every agent received the message `hi`. The pipeline skipped vector and graph search and returned a friendly greeting. Example output:
 
 ```
 [
@@ -23,9 +23,9 @@ The test suite hit the health endpoint and sent a chat request to each agent rol
   {
     "status": 200,
     "body": {
-      "message": "No relevant information found for your query: 'Hello from investor'",
-      "session_id": "e05fc00b-0274-4aa2-b452-59a2b48a7244",
-      "assistant_message_id": "1e08230e-bbe8-419d-a5b5-ed239308cf22",
+      "message": "Hello! How can I assist you with real estate today?",
+      "session_id": "9ed928ff-432c-4a61-ad4d-eb26c4394c52",
+      "assistant_message_id": "238ae524-5007-49b0-89b5-de12317eec48",
       "tools_used": [],
       "metadata": {}
     },

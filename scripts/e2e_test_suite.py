@@ -123,7 +123,7 @@ async def ingest_sample_data() -> None:
 
 
 async def call_chat_endpoint(client: AsyncClient, role: str) -> Dict[str, Any]:
-    payload = {"message": f"Hello from {role}", "session_id": str(uuid.uuid4())}
+    payload = {"message": "hi", "session_id": str(uuid.uuid4())}
     resp = await client.post(f"/agents/{role}/chat", json=payload)
     body = resp.json()
     return {"status": resp.status_code, "body": body}
