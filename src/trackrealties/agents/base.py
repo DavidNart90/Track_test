@@ -14,7 +14,7 @@ from ..validation.base import ResponseValidator
 from ..models.agent import ValidationResult
 from pydantic_ai.models.openai import OpenAIModel
 from ..rag.pipeline import RAGPipeline
-from rag_pipeline_integration import EnhancedRAGPipeline
+from ..rag.optimized_pipeline import EnhancedRAGPipeline
 from ..models.db import ConversationMessage, MessageRole
 
 logger = logging.getLogger(__name__)
