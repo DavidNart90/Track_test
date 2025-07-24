@@ -16,16 +16,142 @@ from src.trackrealties.analytics.search import search_analytics, SearchAnalytics
 from .smart_search import (
     SmartSearchRouter,
     FixedGraphSearch,
-    SearchStrategy,
     RealEstateEntityExtractor
 )
 from src.trackrealties.rag.embedders import DefaultEmbedder
 from src.trackrealties.rag.synthesizer import ResponseSynthesizer
 from src.trackrealties.validation.hallucination import RealEstateHallucinationDetector
 from src.trackrealties.models.agent import ValidationResult
+import re
+
 
 logger = logging.getLogger(__name__)
 
+
+class GreetingDetector:
+    """
+    Sophisticated greeting detection that handles various greeting patterns
+    """
+    
+    # Comprehensive greeting patterns
+    GREETING_PATTERNS = [
+        # Basic greetings
+        r'\b(hi|hey|hello|greetings|good\s+(morning|afternoon|evening|day))\b',
+        # How are you variations
+        r'\bhow\s+(are|r)\s+(you|u|ya)\b',
+        r'\bhow\'s\s+it\s+going\b',
+        r'\bwhat\'s\s+up\b',
+        r'\bwhats\s+up\b',
+        # Agent specific greetings
+        r'\b(hi|hello|hey)\s+agent\b',
+        r'\bagent\s*,?\s*(hi|hello|hey)\b',
+        # Polite greetings
+        r'\bgood\s+to\s+(see|meet)\s+you\b',
+        r'\bnice\s+to\s+meet\s+you\b',
+        # Start of conversation
+        r'^(well\s+)?(hi|hello|hey)\s*[,!.]?\s*$',
+        r'^greetings\s*[,!.]?\s*$',
+        # Question greetings
+        r'\bhow\s+do\s+you\s+do\b',
+        r'\bhow\s+are\s+things\b',
+        # Simple standalone greetings
+        r'^(yo|sup|hiya|howdy)\s*[,!.]?\s*$',
+    ]
+    
+    # Compile patterns for efficiency
+    COMPILED_PATTERNS = [re.compile(pattern, re.IGNORECASE) for pattern in GREETING_PATTERNS]
+    
+    # Context words that might appear with greetings but don't change the intent
+    GREETING_CONTEXT_WORDS = {
+        'there', 'mate', 'friend', 'pal', 'buddy', 'folks', 'everyone',
+        'team', 'all', 'guys', 'hope', 'doing', 'well', 'today', 'morning',
+        'afternoon', 'evening', 'night'
+    }
+    
+    @classmethod
+    def is_greeting(cls, query: str) -> bool:
+        """
+        Detect if a query is a greeting using multiple strategies
+        """
+        # Normalize the query
+        normalized = query.lower().strip()
+        
+        # Remove punctuation for word-based checks
+        words_only = re.sub(r'[^\w\s]', ' ', normalized).split()
+        
+        # Strategy 1: Check against compiled patterns
+        for pattern in cls.COMPILED_PATTERNS:
+            if pattern.search(normalized):
+                return True
+        
+        # Strategy 2: Check if query is mostly greeting words
+        if len(words_only) <= 6:  # Short queries only
+            greeting_words = {'hi', 'hello', 'hey', 'how', 'are', 'you', 'good', 
+                            'morning', 'afternoon', 'evening', 'greetings', 'howdy',
+                            'whats', 'up', 'sup', 'hiya', 'yo'}
+            
+            # Count greeting-related words
+            greeting_word_count = sum(1 for word in words_only if word in greeting_words)
+            total_meaningful_words = sum(1 for word in words_only if word not in cls.GREETING_CONTEXT_WORDS)
+            
+            # If more than 50% of meaningful words are greeting words, it's likely a greeting
+            if total_meaningful_words > 0 and greeting_word_count / total_meaningful_words >= 0.5:
+                return True
+        
+        # Strategy 3: Check for greeting at start of query (even with other content)
+        if any(normalized.startswith(greeting) for greeting in ['hi ', 'hello ', 'hey ', 'greetings ']):
+            # But make sure it's not asking about a property or location
+            if not any(keyword in normalized for keyword in ['property', 'house', 'home', 'listing', 'price', 'bedroom', 'location']):
+                return True
+        
+        return False
+    
+    @classmethod
+    def extract_greeting_intent(cls, query: str) -> Dict[str, Any]:
+        """
+        Extract the type and context of the greeting
+        """
+        normalized = query.lower().strip()
+        
+        intent = {
+            "is_greeting": True,
+            "greeting_type": "general",
+            "expects_response_about": None,
+            "formality_level": "casual"
+        }
+        
+        # Determine greeting type
+        if any(phrase in normalized for phrase in ['how are you', 'how r u', 'hows it going', 'how do you do']):
+            intent["greeting_type"] = "how_are_you"
+            intent["expects_response_about"] = "wellbeing"
+        elif any(phrase in normalized for phrase in ['good morning', 'good afternoon', 'good evening']):
+            intent["greeting_type"] = "time_based"
+            intent["formality_level"] = "formal"
+        elif any(phrase in normalized for phrase in ['whats up', 'sup', 'yo']):
+            intent["greeting_type"] = "casual"
+            intent["formality_level"] = "very_casual"
+        
+        return intent
+
+
+class GreetingSearchResult(SearchResult):
+    """
+    Special search result for greetings that signals the agent to use greeting prompt
+    """
+    def __init__(self):
+        super().__init__(
+            result_id="greeting_response",
+            content="GREETING_DETECTED",
+            result_type="greeting",
+            relevance_score=1.0,
+            title="Greeting Response Required",
+            source="system",
+            metadata={
+                "instruction": "Use GREETINGS_PROMPT to generate a welcoming response",
+                "skip_search": True,
+                "response_type": "greeting"
+            }
+        )   
 
 class OptimizedVectorSearch:
     """
@@ -500,6 +626,7 @@ class EnhancedRAGPipeline:
         self.vector_search = OptimizedVectorSearch()
         self.graph_search = OptimizedGraphSearch()
         self.hybrid_search = OptimizedHybridSearch()
+        self.greeting_detector = GreetingDetector()
 
 
         self.analytics = analytics or search_analytics
@@ -530,13 +657,28 @@ class EnhancedRAGPipeline:
         if not self.initialized:
             await self.initialize()
 
-        normalized = query.lower().strip()
-        greetings = {"hi", "hello", "hey", "hi agent", "hello agent", "hey agent"}
-        if normalized in greetings:
-            return []
+        # Check if the query is a greeting
+        if self.greeting_detector.is_greeting(query):
+             # Log the greeting detection
+            logger.info(f"Greeting detected: '{query}'")
+            
+            # Get greeting context
+            greeting_context = self.greeting_detector.extract_greeting_intent(query)
+
+            # Return a special result that signals the agent to use greeting prompt
+            greeting_result = GreetingSearchResult()
+            greeting_result.metadata.update(greeting_context)
+
+                        # Log analytics if available
+            if self.analytics:
+                await self.analytics.log_search_execution(
+                    query, "greeting", [greeting_result], 0.0
+                )
+            # Return greeting result
+            return [greeting_result]
 
         try:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(datetime.timezone.utc)
 
             # Determine optimal search strategy
             strategy = await self.smart_router.route_search(query, user_context)
@@ -546,7 +688,7 @@ class EnhancedRAGPipeline:
                 query, strategy, limit=limit, filters=filters
             )
 
-            response_time = (datetime.utcnow() - start_time).total_seconds()
+            response_time = (datetime.now(datetime.timezone.utc) - start_time).total_seconds()
 
             # Log search performance
             logger.info(

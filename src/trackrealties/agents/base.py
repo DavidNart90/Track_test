@@ -5,6 +5,7 @@ Base classes for all agents in the TrackRealties AI Platform.
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Optional
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 from pydantic_ai.agent import Agent as PydanticAI
@@ -21,6 +22,8 @@ from ..rag.pipeline import RAGPipeline
 from ..rag.rag_pipeline_integration import EnhancedRAGPipeline
 from ..validation.base import ResponseValidator
 from .context import ContextManager
+from .prompts import GREETINGS_PROMPT 
+
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +62,8 @@ class BaseTool(ABC):
 
         wrapper.__name__ = self.name
         return wrapper
+    
+
 
 
 class AgentDependencies(BaseModel):
@@ -135,77 +140,128 @@ class BaseAgent(ABC):
     async def run(
         self,
         message: str,
-        session_id: str,
-        user_id: str | None = None,
-        user_role: str | None = None,
+        *,
+        session_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        user_role: Optional[str] = None,
+        **kwargs
     ) -> AgentResponse:
-        """
-        Runs the agent for a single turn.
-        """
-        context = self.dependencies.context_manager.get_or_create_context(
-            session_id, user_id, user_role
-        )
-
-        # Record the user message in the conversation history
-        user_msg = ConversationMessage(
-            session_id=session_id,
-            role=MessageRole.USER,
-            content=message,
-        )
-        context.add_message(user_msg)
-
+        """Process a message with greeting detection."""
         try:
-            # Use the RAG pipeline to generate a response
-            response_content, validation = (
-                await self.dependencies.rag_pipeline.generate_response(
-                    query=message, context=context.dict()
-                )
+            # Get or create context
+            context = self.dependencies.context_manager.get_or_create_context(
+                session_id=session_id or "default",
+                user_id=user_id,
+                user_role=user_role,
+            )
+            user_message = ConversationMessage(
+                role=MessageRole.USER,
+                content=message,
+                session_id=session_id or "default",
+                created_at=datetime.utcnow(),
+            )
+            context.add_message(user_message)
+
+            # Search for relevant content using RAG pipeline
+            search_results = await self.dependencies.rag_pipeline.search(
+                message,
+                user_context={
+                    "user_role": user_role,
+                    "session_id": session_id,
+                    "history": [msg.content for msg in context.get_recent_messages(5)]
+                }
             )
 
-            agent_response = AgentResponse(content=response_content)
-            """codex/implement-realestatehallucinationdetector-and-tests"""
-            combined_result = validation
+            if search_results and len(search_results) > 0 and search_results[0].result_type == "greeting":
+                logger.info(f"Processing greeting from {user_role or 'user'}")
 
-            # Append assistant message to history
-            assistant_msg = ConversationMessage(
-                session_id=session_id,
-                role=MessageRole.ASSISTANT,
-                content=agent_response.content,
-            )
-            context.add_message(assistant_msg)
+                # If greeting detected, respond with the greetings prompt
+                greeting_prompt = GREETINGS_PROMPT
+                # Add role-specific context to the greeting prompt
+                role_context = {
+                    "investor": "\n\nThe user is an investor, so mention how you can help with ROI analysis, market trends, and investment opportunities.",
+                    "developer": "\n\nThe user is a developer, so mention how you can assist with site analysis, feasibility studies, and development opportunities.",
+                    "buyer": "\n\nThe user is a home buyer, so mention how you can help find the perfect property, analyze neighborhoods, and guide through the buying process.",
+                    "agent": "\n\nThe user is a real estate agent, so mention how you can provide market intelligence, lead insights, and business growth strategies."
+                }
+                greeting_prompt += role_context.get(user_role, "")
 
-            # Persist updated context
-            self.dependencies.context_manager.update_context(session_id, context)
-            # Planning-for-Phase-2-Docs
-
-            if self.validator:
-                extra = await self.validator.validate_response(
-                    response=agent_response.content, context=context, user_query=message
-                )
-                combined_result = ValidationResult(
-                    is_valid=validation.is_valid and extra.is_valid,
-                    confidence_score=min(
-                        validation.confidence_score, extra.confidence_score
-                    ),
-                    issues=validation.issues + extra.issues,
-                    validation_type="combined",
-                    validator_version="1.0",
-                    correction_needed=validation.correction_needed
-                    or extra.correction_needed,
+                # Create temporary agent with greeting prompt
+                greeting_agent = PydanticAI(
+                    self.model,
+                    system_prompt=greeting_prompt,
+                    tools=[tool.as_function() for tool in self.tools.values()]
                 )
 
-            agent_response.validation_result = combined_result.dict()
-            agent_response.confidence_score = combined_result.confidence_score
+                # Generate greeting response using LLM
+                result = await greeting_agent.run(message)
+                response_content = str(result.output)
 
-            # Mock tool usage for now
-            agent_response.tools_used = []
+                # Create agent response
+                return AgentResponse(
+                    content=response_content,
+                    tools_used=[{"tool": "greeting_handler", "input": message}],
+                    confidence_score=1.0,
+                    metadata={"response_type": "greeting", "user_role": user_role}
+                )
+            else:
+                try:
+                    # Use the RAG pipeline to generate a response
+                    response_content, validation = (
+                        await self.dependencies.rag_pipeline.generate_response(
+                            query=message, context=context.dict()
+                        )
+                    )
 
-            return agent_response
+                    agent_response = AgentResponse(content=response_content)
+                    """codex/implement-realestatehallucinationdetector-and-tests"""
+                    combined_result = validation
 
+                    # Append assistant message to history
+                    assistant_msg = ConversationMessage(
+                        session_id=session_id,
+                        role=MessageRole.ASSISTANT,
+                        content=agent_response.content,
+                    )
+                    context.add_message(assistant_msg)
+
+                    # Persist updated context
+                    self.dependencies.context_manager.update_context(session_id, context)
+                    # Planning-for-Phase-2-Docs
+
+                    if self.validator:
+                        extra = await self.validator.validate_response(
+                            response=agent_response.content, context=context, user_query=message
+                        )
+                        combined_result = ValidationResult(
+                            is_valid=validation.is_valid and extra.is_valid,
+                            confidence_score=min(
+                                validation.confidence_score, extra.confidence_score
+                            ),
+                            issues=validation.issues + extra.issues,
+                            validation_type="combined",
+                            validator_version="1.0",
+                            correction_needed=validation.correction_needed or extra.correction_needed,
+                        )
+
+                    agent_response.validation_result = combined_result.dict()
+                    agent_response.confidence_score = combined_result.confidence_score
+
+                    # Mock tool usage for now
+                    agent_response.tools_used = []
+
+                    return agent_response
+
+                except Exception as e:
+                    logger.error(f"Agent {self.agent_name} failed to run: {e}", exc_info=True)
+                    return AgentResponse(
+                        content=f"I'm sorry, but I encountered an error: {e}",
+                        confidence_score=0.0,
+                    )
         except Exception as e:
-            logger.error(f"Agent {self.agent_name} failed to run: {e}", exc_info=True)
+            logger.error(f"Unexpected error in Agent {self.agent_name}: {e}", exc_info=True)
             return AgentResponse(
-                content=f"I'm sorry, but I encountered an error: {e}",
+                content=f"I'm sorry, but I encountered an unexpected error: {e}",
                 confidence_score=0.0,
             )
 
