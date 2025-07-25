@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = os.getenv("APP_VERSION", "1.0.0")
     
     # PostgreSQL Database Settings
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DATABASE_URL:  Optional[str] = os.getenv("DATABASE_URL")
     DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", 10))
     POSTGRES_URI: Optional[str] = os.getenv("POSTGRES_URI", os.getenv("DATABASE_URL"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")

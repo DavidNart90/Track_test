@@ -1,0 +1,59 @@
+{
+  "error_id": "20250725_191902_e957d728",
+  "timestamp": "2025-07-25T19:19:02.837936+00:00",
+  "error_type": "TypeError",
+  "error_message": "Logger._log() got an unexpected keyword argument 'error'",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 168, in save_property_to_database\n    property_id = await self._save_property_listing(conn, property_data)\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 327, in _save_property_listing\n    result = await conn.fetchval(\n             ^^^^^^^^^^^^^^^^^^^^\n    ...<30 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 714, in fetchval\n    data = await self._execute(query, args, 1, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1864, in _execute\n    result, _ = await self.__execute(\n                ^^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1961, in __execute\n    result, stmt = await self._do_execute(\n                   ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 2027, in _do_execute\n    result = await executor(stmt, timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"asyncpg\\\\protocol\\\\protocol.pyx\", line 206, in bind_execute\nasyncpg.exceptions.UniqueViolationError: duplicate key value violates unique constraint \"property_listings_pkey\"\nDETAIL:  Key (id)=(114-Wolf-Pr,-Universal-City,-TX-78148) already exists.\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 250, in ingest_property_listings\n    db_result = await self.db_integration.save_property_to_database(\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        record, chunks\n        ^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 194, in save_property_to_database\n    self.logger.error(\"Failed to save property listing\", error=str(e), **context)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\python313\\Lib\\logging\\__init__.py\", line 1548, in error\n    self._log(ERROR, msg, args, **kwargs)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Logger._log() got an unexpected keyword argument 'error'\n",
+  "context": {
+    "source": "sample_data",
+    "record": {
+      "id": "114-Wolf-Pr,-Universal-City,-TX-78148",
+      "formattedAddress": "114 Wolf Pr, Universal City, TX 78148",
+      "addressLine1": "114 Wolf Pr",
+      "addressLine2": null,
+      "city": "Universal City",
+      "state": "TX",
+      "zipCode": "78148",
+      "county": "Bexar",
+      "latitude": 29.561208,
+      "longitude": -98.306766,
+      "propertyType": "Single Family",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "squareFootage": 1948,
+      "lotSize": 10411,
+      "yearBuilt": 1983,
+      "status": "Active",
+      "price": 274500,
+      "listingType": "Standard",
+      "listedDate": "2025-03-20T00:00:00.000Z",
+      "removedDate": null,
+      "createdDate": "2025-03-21T00:00:00.000Z",
+      "lastSeenDate": "2025-07-16T14:35:15.250Z",
+      "daysOnMarket": 119,
+      "mlsName": "SanAntonio",
+      "mlsNumber": "1851222",
+      "listingAgent": {
+        "name": "Joy Collins",
+        "phone": "2106580928",
+        "email": "jgcollins@peoplepc.com"
+      },
+      "listingOffice": {
+        "name": "Tucker Co, REALTORS",
+        "phone": "2106580928",
+        "email": "richard.prater@era.com",
+        "website": "www.eratucker.com"
+      },
+      "history": {
+        "2025-03-20": {
+          "event": "Sale Listing",
+          "price": 274500,
+          "listingType": "Standard",
+          "listedDate": "2025-03-20T00:00:00.000Z",
+          "removedDate": null,
+          "daysOnMarket": 119
+        }
+      }
+    }
+  }
+}

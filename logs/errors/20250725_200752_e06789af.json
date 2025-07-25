@@ -1,0 +1,62 @@
+{
+  "error_id": "20250725_200752_e06789af",
+  "timestamp": "2025-07-25T20:07:52.912631+00:00",
+  "error_type": "TypeError",
+  "error_message": "Logger._log() got an unexpected keyword argument 'error'",
+  "traceback": "Traceback (most recent call last):\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar\n  File \"asyncpg\\\\pgproto\\\\./codecs/uuid.pyx\", line 16, in asyncpg.pgproto.pgproto.uuid_encode\n  File \"asyncpg\\\\pgproto\\\\./uuid.pyx\", line 88, in asyncpg.pgproto.pgproto.pg_uuid_bytes_from_str\nValueError: invalid UUID '126-Lantana-Way,-San-Antonio,-TX-78258': length must be between 32..36 characters, got 38\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 172, in save_property_to_database\n    chunk_ids = await self._save_property_chunks(conn, property_id, chunks)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 432, in _save_property_chunks\n    chunk_id = await conn.fetchval(\n               ^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 714, in fetchval\n    data = await self._execute(query, args, 1, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1864, in _execute\n    result, _ = await self.__execute(\n                ^^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1961, in __execute\n    result, stmt = await self._do_execute(\n                   ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 2027, in _do_execute\n    result = await executor(stmt, timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"asyncpg\\\\protocol\\\\protocol.pyx\", line 185, in bind_execute\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\nasyncpg.exceptions.DataError: invalid input for query argument $1: '126-Lantana-Way,-San-Antonio,-TX-78258' (invalid UUID '126-Lantana-Way,-San-Antonio,-TX-78258': length must be between 32..36 characters, got 38)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 250, in ingest_property_listings\n    db_result = await self.db_integration.save_property_to_database(\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        record, chunks\n        ^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 194, in save_property_to_database\n    self.logger.error(\"Failed to save property listing\", error=str(e), **context)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\python313\\Lib\\logging\\__init__.py\", line 1548, in error\n    self._log(ERROR, msg, args, **kwargs)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Logger._log() got an unexpected keyword argument 'error'\n",
+  "context": {
+    "source": "rentcast",
+    "record": {
+      "id": "126-Lantana-Way,-San-Antonio,-TX-78258",
+      "formattedAddress": "126 Lantana Way, San Antonio, TX 78258",
+      "addressLine1": "126 Lantana Way",
+      "addressLine2": null,
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "78258",
+      "county": "Bexar",
+      "latitude": 29.659581,
+      "longitude": -98.486631,
+      "propertyType": "Single Family",
+      "bedrooms": 4,
+      "bathrooms": 3,
+      "squareFootage": 3641,
+      "lotSize": 9322,
+      "yearBuilt": 2004,
+      "hoa": {
+        "fee": 223
+      },
+      "status": "Active",
+      "price": 774900,
+      "listingType": "Standard",
+      "listedDate": "2025-03-19T00:00:00.000Z",
+      "removedDate": null,
+      "createdDate": "2025-03-20T00:00:00.000Z",
+      "lastSeenDate": "2025-07-16T14:35:15.248Z",
+      "daysOnMarket": 120,
+      "mlsName": "SanAntonio",
+      "mlsNumber": "1850982",
+      "listingAgent": {
+        "name": "Mary Hall, Agent",
+        "phone": "2104823227",
+        "email": "thehallteam@kw.com",
+        "website": "http://www.hallfamilyhomessa.com"
+      },
+      "listingOffice": {
+        "name": "Keller Williams Legacy",
+        "phone": "2104823200",
+        "email": "stevengragg@kw.com"
+      },
+      "history": {
+        "2025-03-19": {
+          "event": "Sale Listing",
+          "price": 774900,
+          "listingType": "Standard",
+          "listedDate": "2025-03-19T00:00:00.000Z",
+          "removedDate": null,
+          "daysOnMarket": 120
+        }
+      }
+    }
+  }
+}

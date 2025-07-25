@@ -33,7 +33,7 @@ async def check_and_clear_data():
         SELECT table_name 
         FROM information_schema.tables 
         WHERE table_schema = 'public' AND 
-              table_name IN ('market_data', 'property_listings', 'market_chunks', 'property_chunks','conversation_messages', 'user_sessions');
+              table_name IN ('market_data', 'property_listings', 'market_chunks', 'property_chunks','market_chunks_enhanced','property_chunks_enhanced','conversation_messages', 'user_sessions');
         """
         tables = await conn.fetch(tables_query)
         

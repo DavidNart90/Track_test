@@ -8,6 +8,7 @@ import hashlib
 from typing import Dict, Any, List, Optional, Tuple, Set
 from datetime import datetime
 
+from .enhanced_semantic_chunker import EnhancedSemanticChunker
 from ...core.config import get_settings
 from .chunk import Chunk
 from .market_chunker import MarketDataChunker
@@ -37,6 +38,12 @@ class JSONChunker:
             max_chunk_size: Maximum size of a chunk in characters
             chunk_overlap: Overlap between chunks in characters
         """
+        self.enhanced_chunker = EnhancedSemanticChunker(
+            max_chunk_size or settings.max_chunk_size,
+            chunk_overlap or settings.chunk_overlap
+        )
+    
+    
         self.logger = logging.getLogger(__name__)
         self.max_chunk_size = max_chunk_size or settings.max_chunk_size
         self.chunk_overlap = chunk_overlap or settings.chunk_overlap
@@ -45,6 +52,13 @@ class JSONChunker:
         self.market_chunker = MarketDataChunker(self.max_chunk_size, self.chunk_overlap)
         self.property_chunker = PropertyListingChunker(self.max_chunk_size, self.chunk_overlap)
         self.generic_chunker = GenericChunker(self.max_chunk_size, self.chunk_overlap)
+
+
+
+    # Add this new method
+    def chunk_json_enhanced(self, data: Dict[str, Any], data_type: str) -> List[Dict[str, Any]]:
+        """Use enhanced semantic chunking"""
+        return self.enhanced_chunker.chunk_with_semantic_awareness(data, data_type)
     
     def chunk_market_data(self, market_data: Dict[str, Any]) -> List[Chunk]:
         """
@@ -106,3 +120,5 @@ class JSONChunker:
     def _extract_keywords_from_description(self, description: str) -> List[str]:
         """Extract important keywords from a property description."""
         return self.property_chunker._extract_keywords_from_description(description)
+    
+

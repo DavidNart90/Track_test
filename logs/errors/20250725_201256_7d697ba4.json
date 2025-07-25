@@ -1,0 +1,59 @@
+{
+  "error_id": "20250725_201256_7d697ba4",
+  "timestamp": "2025-07-25T20:12:56.445554+00:00",
+  "error_type": "TypeError",
+  "error_message": "Logger._log() got an unexpected keyword argument 'error'",
+  "traceback": "Traceback (most recent call last):\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar\n  File \"asyncpg\\\\pgproto\\\\./codecs/uuid.pyx\", line 16, in asyncpg.pgproto.pgproto.uuid_encode\n  File \"asyncpg\\\\pgproto\\\\./uuid.pyx\", line 88, in asyncpg.pgproto.pgproto.pg_uuid_bytes_from_str\nValueError: invalid UUID '2202-Virginia-Blvd,-Unit-201,-San-Antonio,-TX-78203': length must be between 32..36 characters, got 51\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 172, in save_property_to_database\n    chunk_ids = await self._save_property_chunks(conn, property_id, chunks)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 432, in _save_property_chunks\n    chunk_id = await conn.fetchval(\n               ^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 714, in fetchval\n    data = await self._execute(query, args, 1, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1864, in _execute\n    result, _ = await self.__execute(\n                ^^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1961, in __execute\n    result, stmt = await self._do_execute(\n                   ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 2027, in _do_execute\n    result = await executor(stmt, timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"asyncpg\\\\protocol\\\\protocol.pyx\", line 185, in bind_execute\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\nasyncpg.exceptions.DataError: invalid input for query argument $1: '2202-Virginia-Blvd,-Unit-201,-San-Anton... (invalid UUID '2202-Virginia-Blvd,-Unit-201,-San-Antonio,-TX-78203': length must be between 32..36 characters, got 51)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 251, in ingest_property_listings\n    db_result = await self.db_integration.save_property_to_database(\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        record, chunks\n        ^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 194, in save_property_to_database\n    self.logger.error(\"Failed to save property listing\", error=str(e), **context)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\python313\\Lib\\logging\\__init__.py\", line 1548, in error\n    self._log(ERROR, msg, args, **kwargs)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Logger._log() got an unexpected keyword argument 'error'\n",
+  "context": {
+    "source": "rentcast",
+    "record": {
+      "id": "2202-Virginia-Blvd,-Unit-201,-San-Antonio,-TX-78203",
+      "formattedAddress": "2202 Virginia Blvd, Unit 201, San Antonio, TX 78203",
+      "addressLine1": "2202 Virginia Blvd",
+      "addressLine2": "Unit 201",
+      "city": "San Antonio",
+      "state": "TX",
+      "zipCode": "78203",
+      "county": "Bexar",
+      "latitude": 29.410629,
+      "longitude": -98.450699,
+      "propertyType": "Single Family",
+      "bedrooms": 3,
+      "bathrooms": 2.5,
+      "squareFootage": 1713,
+      "lotSize": 6098,
+      "yearBuilt": 2024,
+      "status": "Active",
+      "price": 265000,
+      "listingType": "Standard",
+      "listedDate": "2025-03-19T00:00:00.000Z",
+      "removedDate": null,
+      "createdDate": "2025-03-20T00:00:00.000Z",
+      "lastSeenDate": "2025-07-16T14:35:15.251Z",
+      "daysOnMarket": 120,
+      "mlsName": "SanAntonio",
+      "mlsNumber": "1851142",
+      "listingAgent": {
+        "name": "Gilley Mendoza",
+        "phone": "2104451384",
+        "email": "gilley@gilleyinternational.com",
+        "website": "http://www.gilleyinternationalgroup.com"
+      },
+      "listingOffice": {
+        "name": "Real Broker, Llc",
+        "phone": "8554500442",
+        "email": "support@therealbrokerage.com"
+      },
+      "history": {
+        "2025-03-19": {
+          "event": "Sale Listing",
+          "price": 265000,
+          "listingType": "Standard",
+          "listedDate": "2025-03-19T00:00:00.000Z",
+          "removedDate": null,
+          "daysOnMarket": 120
+        }
+      }
+    }
+  }
+}

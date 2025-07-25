@@ -1,0 +1,78 @@
+{
+  "error_id": "20250725_200750_851d0cd7",
+  "timestamp": "2025-07-25T20:07:50.143416+00:00",
+  "error_type": "TypeError",
+  "error_message": "Logger._log() got an unexpected keyword argument 'error'",
+  "traceback": "Traceback (most recent call last):\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 175, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 227, in asyncpg.protocol.protocol.Codec.encode\n  File \"asyncpg\\\\protocol\\\\codecs/base.pyx\", line 129, in asyncpg.protocol.protocol.Codec.encode_scalar\n  File \"asyncpg\\\\pgproto\\\\./codecs/uuid.pyx\", line 16, in asyncpg.pgproto.pgproto.uuid_encode\n  File \"asyncpg\\\\pgproto\\\\./uuid.pyx\", line 88, in asyncpg.pgproto.pgproto.pg_uuid_bytes_from_str\nValueError: invalid UUID '29736-No-Le-Hace-Dr,-Fair-Oaks-Ranch,-TX-78015': length must be between 32..36 characters, got 46\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 172, in save_property_to_database\n    chunk_ids = await self._save_property_chunks(conn, property_id, chunks)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 432, in _save_property_chunks\n    chunk_id = await conn.fetchval(\n               ^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 714, in fetchval\n    data = await self._execute(query, args, 1, timeout)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1864, in _execute\n    result, _ = await self.__execute(\n                ^^^^^^^^^^^^^^^^^^^^^\n    ...<7 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 1961, in __execute\n    result, stmt = await self._do_execute(\n                   ^^^^^^^^^^^^^^^^^^^^^^^\n    ...<5 lines>...\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\venv\\Lib\\site-packages\\asyncpg\\connection.py\", line 2027, in _do_execute\n    result = await executor(stmt, timeout)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"asyncpg\\\\protocol\\\\protocol.pyx\", line 185, in bind_execute\n  File \"asyncpg\\\\protocol\\\\prepared_stmt.pyx\", line 204, in asyncpg.protocol.protocol.PreparedStatementState._encode_bind_msg\nasyncpg.exceptions.DataError: invalid input for query argument $1: '29736-No-Le-Hace-Dr,-Fair-Oaks-Ranch,-T... (invalid UUID '29736-No-Le-Hace-Dr,-Fair-Oaks-Ranch,-TX-78015': length must be between 32..36 characters, got 46)\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 250, in ingest_property_listings\n    db_result = await self.db_integration.save_property_to_database(\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n        record, chunks\n        ^^^^^^^^^^^^^^\n    )\n    ^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\database_integration.py\", line 194, in save_property_to_database\n    self.logger.error(\"Failed to save property listing\", error=str(e), **context)\n    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"c:\\python313\\Lib\\logging\\__init__.py\", line 1548, in error\n    self._log(ERROR, msg, args, **kwargs)\n    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Logger._log() got an unexpected keyword argument 'error'\n",
+  "context": {
+    "source": "rentcast",
+    "record": {
+      "id": "29736-No-Le-Hace-Dr,-Fair-Oaks-Ranch,-TX-78015",
+      "formattedAddress": "29736 No Le Hace Dr, Fair Oaks Ranch, TX 78015",
+      "addressLine1": "29736 No Le Hace Dr",
+      "addressLine2": null,
+      "city": "Fair Oaks Ranch",
+      "state": "TX",
+      "zipCode": "78015",
+      "county": "Bexar",
+      "latitude": 29.741424,
+      "longitude": -98.625322,
+      "propertyType": "Single Family",
+      "bedrooms": 4,
+      "bathrooms": 3,
+      "squareFootage": 2629,
+      "lotSize": 23522,
+      "yearBuilt": 1999,
+      "hoa": {
+        "fee": 10
+      },
+      "status": "Active",
+      "price": 690000,
+      "listingType": "Standard",
+      "listedDate": "2025-03-19T00:00:00.000Z",
+      "removedDate": null,
+      "createdDate": "2024-05-08T00:00:00.000Z",
+      "lastSeenDate": "2025-07-16T14:35:15.249Z",
+      "daysOnMarket": 120,
+      "mlsName": "SanAntonio",
+      "mlsNumber": "1850967",
+      "listingAgent": {
+        "name": "Faira L Stevick",
+        "phone": "2108598777",
+        "email": "fstevick@kw.com",
+        "website": "http://www.fairastevick.com"
+      },
+      "listingOffice": {
+        "name": "eXp Realty, LLC",
+        "phone": "8885197431",
+        "email": "djones@wandjlaw.com"
+      },
+      "history": {
+        "2024-05-08": {
+          "event": "Sale Listing",
+          "price": 750000,
+          "listingType": "Standard",
+          "listedDate": "2024-05-08T00:00:00.000Z",
+          "removedDate": "2024-10-01T00:00:00.000Z",
+          "daysOnMarket": 146
+        },
+        "2024-11-01": {
+          "event": "Sale Listing",
+          "price": 745000,
+          "listingType": "Standard",
+          "listedDate": "2024-11-01T00:00:00.000Z",
+          "removedDate": "2025-02-11T00:00:00.000Z",
+          "daysOnMarket": 102
+        },
+        "2025-03-19": {
+          "event": "Sale Listing",
+          "price": 690000,
+          "listingType": "Standard",
+          "listedDate": "2025-03-19T00:00:00.000Z",
+          "removedDate": null,
+          "daysOnMarket": 120
+        }
+      }
+    }
+  }
+}

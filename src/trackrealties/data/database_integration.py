@@ -12,6 +12,8 @@ from typing import Dict, Any, List, Optional, Tuple, Set
 from uuid import UUID
 import json
 from datetime import datetime
+import uuid
+import hashlib
 
 from ..core.config import get_settings
 from ..core.database import DatabaseManager, db_manager
@@ -392,7 +394,7 @@ class DatabaseIntegration:
         chunk_ids = []
         for i, chunk in enumerate(chunks):
             query = """
-            INSERT INTO market_chunks (
+            INSERT INTO market_chunks_enhanced (
                 market_data_id, content, chunk_index, token_count, embedding, metadata
             ) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id
@@ -424,7 +426,7 @@ class DatabaseIntegration:
         chunk_ids = []
         for i, chunk in enumerate(chunks):
             query = """
-            INSERT INTO property_chunks (
+            INSERT INTO property_chunks_enhanced (
                 property_listing_id, content, chunk_index, token_count, embedding, metadata
             ) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id

@@ -9,9 +9,12 @@ import logging
 import asyncio
 from typing import Dict, Any, List, Optional, Tuple, Set, Union
 from datetime import datetime
+import os
 import uuid
 from dataclasses import dataclass, field
 
+# Add this import at the top
+from ..data.embedding.optimized_embedder import OptimizedEmbeddingPipeline, NeonDBEmbeddingManager
 from ..core.config import get_settings, Settings
 from .chunking.json_chunker import JSONChunker
 from .chunking.chunk import Chunk
@@ -58,6 +61,15 @@ class EnhancedIngestionPipeline:
             skip_graph: Whether to skip graph building
             settings: Application settings
         """
+                # Use optimized embedding pipeline
+        self.optimized_embedder = OptimizedEmbeddingPipeline(
+            batch_size=batch_size or 50,
+            max_concurrent_batches=3,
+            enable_cache_warming=True
+        )
+        
+        # Use enhanced NeonDB manager
+        self.neon_manager = NeonDBEmbeddingManager(os.environ.get("DATABASE_URL"))
         self.logger = logging.getLogger(__name__)
         self.settings = settings or get_settings()
         self.batch_size = batch_size or self.settings.ingestion_batch_size
@@ -72,6 +84,8 @@ class EnhancedIngestionPipeline:
         
         # Track initialization status
         self.initialized = False
+
+
     
     async def initialize(self, dry_run: bool = False) -> None:
         """Initialize all components of the pipeline."""
@@ -109,6 +123,12 @@ class EnhancedIngestionPipeline:
             self.initialized = True
             self.logger.info("Enhanced ingestion pipeline initialized successfully")
             
+                    # Initialize optimized components
+            await self.optimized_embedder.initialize()
+            await self.neon_manager.initialize()
+            
+            # Optimize database for vector search
+            await self.neon_manager.optimize_vector_search_performance()
         except Exception as e:
             self.logger.error(f"Failed to initialize enhanced ingestion pipeline: {e}")
             raise
