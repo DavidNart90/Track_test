@@ -3,7 +3,7 @@
 import logging
 import sys
 from typing import Any, Dict, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 import structlog
 from rich.console import Console
@@ -73,7 +73,7 @@ def log_function_call(
         function=function_name,
         args=args or {},
         kwargs=kwargs or {},
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -89,7 +89,7 @@ def log_performance(
         operation=operation,
         duration_ms=duration_ms,
         metadata=metadata or {},
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -104,7 +104,7 @@ def log_error(
         error_type=type(error).__name__,
         error_message=str(error),
         context=context or {},
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
         exc_info=True,
     )
 
@@ -124,7 +124,7 @@ def log_validation_result(
         confidence_score=confidence_score,
         issues_count=len(issues) if issues else 0,
         issues=issues or [],
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -144,7 +144,7 @@ def log_agent_interaction(
         response_length=response_length,
         tools_used=tools_used,
         processing_time_ms=processing_time_ms,
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -162,7 +162,7 @@ def log_database_operation(
         table=table,
         duration_ms=duration_ms,
         rows_affected=rows_affected,
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -182,5 +182,5 @@ def log_external_api_call(
         status_code=status_code,
         duration_ms=duration_ms,
         response_size=response_size,
-        timestamp=datetime.utcnow().isoformat(),
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )

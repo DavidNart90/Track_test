@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
 
@@ -228,7 +228,7 @@ class ValidationMetrics(BaseModel):
     corrections_successful: int = Field(default=0, description="Successful corrections")
     
     # Timestamps
-    last_reset: datetime = Field(default_factory=datetime.utcnow, description="Last metrics reset")
+    last_reset: datetime = Field(default_factory=datetime.now(timezone.utc), description="Last metrics reset")
     
     @property
     def success_rate(self) -> float:
@@ -304,7 +304,7 @@ class ValidationMetrics(BaseModel):
     def reset(self) -> None:
         """Reset all metrics."""
         self.__init__()
-        self.last_reset = datetime.utcnow()
+        self.last_reset = datetime.now(timezone.utc)
     
     def get_summary(self) -> str:
         """Get a summary of validation metrics."""

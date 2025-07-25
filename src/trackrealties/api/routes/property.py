@@ -4,7 +4,7 @@ Property listing API routes for TrackRealties AI Platform.
 
 import logging
 from typing import Dict, List, Optional, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
@@ -159,7 +159,7 @@ async def analyze_property(
         return {
             "property_id": property_id,
             "analysis_type": analysis_type,
-            "analysis_date": datetime.utcnow().isoformat(),
+            "analysis_date": datetime.now(timezone.utc).isoformat(),
             "results": {
                 "estimated_value": float(property_listing.price) * 1.05,
                 "estimated_rent": float(property_listing.price) / 200,

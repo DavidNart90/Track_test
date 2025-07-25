@@ -7,7 +7,7 @@ and user preference tracking for maintaining state across agent interactions.
 
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass, field
 import json
 
@@ -37,8 +37,8 @@ class ConversationContext(BaseModel):
     validation_results: List[ValidationResult] = Field(default_factory=list)
     tools_used: List[str] = Field(default_factory=list)
     metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: Optional[datetime] = None
     
     class Config:
@@ -46,7 +46,7 @@ class ConversationContext(BaseModel):
     def add_message(self, message: Message):
         """Add a message to the conversation history."""
         self.messages.append(message)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def get_recent_messages(self, limit: int = 10) -> List[Message]:
         """Get the most recent messages from the conversation."""
@@ -55,28 +55,28 @@ class ConversationContext(BaseModel):
     def update_preferences(self, preferences: Dict[str, Any]):
         """Update user preferences for this session."""
         self.user_preferences.update(preferences)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def add_search_result(self, search_result: SearchResponse):
         """Add a search result to the history."""
         self.search_history.append(search_result)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def add_validation_result(self, validation_result: ValidationResult):
         """Add a validation result to the history."""
         self.validation_results.append(validation_result)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def is_expired(self) -> bool:
         """Check if this context has expired."""
         if not self.expires_at:
             return False
-        return datetime.utcnow() > self.expires_at
+        return datetime.now(timezone.utc) > self.expires_at
     
     def extend_expiration(self, hours: int = 24):
         """Extend the expiration time for this context."""
-        self.expires_at = datetime.utcnow() + timedelta(hours=hours)
-        self.updated_at = datetime.utcnow()
+        self.expires_at = datetime.now(timezone.utc) + timedelta(hours=hours)
+        self.updated_at = datetime.now(timezone.utc)
 
 
 @dataclass
@@ -94,13 +94,13 @@ class UserProfile:
     favorite_locations: List[str] = field(default_factory=list)
     budget_ranges: Dict[str, Any] = field(default_factory=dict)
     interaction_history: List[Dict[str, Any]] = field(default_factory=list)
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    updated_at: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = field(default_factory=datetime.now(timezone.utc))
     
     def update_preferences(self, new_preferences: Dict[str, Any]):
         """Update user preferences."""
         self.preferences.update(new_preferences)
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def add_search_pattern(self, pattern: str):
         """Add a search pattern to the user's history."""
@@ -109,16 +109,16 @@ class UserProfile:
             # Keep only the most recent 50 patterns
             if len(self.search_patterns) > 50:
                 self.search_patterns = self.search_patterns[-50:]
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
     
     def add_interaction(self, interaction: Dict[str, Any]):
         """Add an interaction to the user's history."""
-        interaction["timestamp"] = datetime.utcnow().isoformat()
+        interaction["timestamp"] = datetime.now(timezone.utc).isoformat()
         self.interaction_history.append(interaction)
         # Keep only the most recent 100 interactions
         if len(self.interaction_history) > 100:
             self.interaction_history = self.interaction_history[-100:]
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
 
 
 class ContextManager:
@@ -171,7 +171,7 @@ class ContextManager:
             session_id=session_id,
             user_id=user_id,
             user_role=user_role,
-            expires_at=datetime.utcnow() + timedelta(hours=self.default_expiration_hours)
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=self.default_expiration_hours)
         )
         
         # Load user preferences if user_id is provided
@@ -209,7 +209,7 @@ class ContextManager:
             session_id: Session identifier
             context: Updated context
         """
-        context.updated_at = datetime.utcnow()
+        context.updated_at = datetime.now(timezone.utc)
         self.contexts[session_id] = context
         
         # Update user profile if user_id is available
@@ -247,7 +247,7 @@ class ContextManager:
             # Update role if provided and not set
             if role and not profile.role:
                 profile.role = role
-                profile.updated_at = datetime.utcnow()
+                profile.updated_at = datetime.now(timezone.utc)
             return profile
         
         # Create new profile

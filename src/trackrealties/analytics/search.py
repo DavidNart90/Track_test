@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
 from enum import Enum
@@ -39,7 +39,7 @@ class SearchAnalytics:
     ) -> None:
         """Log search execution for analysis."""
         analytics_data = {
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(timezone.utc)(),
             "query": query,
             "strategy": strategy.value if isinstance(strategy, Enum) else str(strategy),
             "result_count": len(results),

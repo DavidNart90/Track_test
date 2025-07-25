@@ -7,7 +7,7 @@ for generating comprehensive CMA reports for property valuation.
 
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ..models.property import PropertyListing
 from ..models.market import MarketDataPoint
@@ -64,7 +64,7 @@ class ComparativeMarketAnalysis:
                 "market_position": market_position,
                 "suggested_listing_price": suggested_price,
                 "confidence_score": self._calculate_confidence_score(adjusted_comps),
-                "analysis_date": datetime.utcnow().isoformat()
+                "analysis_date": datetime.now(timezone.utc).isoformat()
             }
 
         except Exception as e:

@@ -1,6 +1,6 @@
 """Health check utilities for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
@@ -10,6 +10,8 @@ from .config import Settings
 from .database import db_manager
 from ..data.graph.graph_builder import GraphBuilder
 from .logging import LoggerMixin
+from .graph import graph_manager
+from .database import test_connection
 
 
 logger = structlog.get_logger(__name__)
@@ -32,12 +34,12 @@ class HealthChecker(LoggerMixin):
     
     async def check_database_health(self) -> HealthStatus:
         """Check PostgreSQL database health."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
-            is_healthy = await db_manager.pool.fetchval("SELECT 1")
+            is_healthy = await test_connection()
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             if is_healthy:
@@ -45,8 +47,8 @@ class HealthChecker(LoggerMixin):
                     healthy=True,
                     message="Database is healthy",
                     details={
-                        "database_url": self.settings.database_url.split("@")[0] + "@***",  # Hide credentials
-                        "pool_size": self.settings.database_pool_size,
+                        "database_url": self.settings.DATABASE_URL.split("@")[0] + "@***",  # Hide credentials
+                        "pool_size": self.settings.DB_POOL_SIZE,
                     },
                     response_time_ms=response_time
                 )
@@ -59,7 +61,7 @@ class HealthChecker(LoggerMixin):
                 )
                 
         except Exception as e:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             self.logger.error("Database health check failed", error=str(e))
@@ -72,14 +74,14 @@ class HealthChecker(LoggerMixin):
     
     async def check_neo4j_health(self) -> HealthStatus:
         """Check Neo4j database health."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
-            neo4j_manager = GraphBuilder()
+            neo4j_manager = graph_manager
             await neo4j_manager.initialize()
-            is_healthy = await neo4j_manager.health_check()
+            is_healthy = await neo4j_manager.test_connection()
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             if is_healthy:
@@ -101,7 +103,7 @@ class HealthChecker(LoggerMixin):
                 )
                 
         except Exception as e:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             self.logger.error("Neo4j health check failed", error=str(e))
@@ -114,7 +116,7 @@ class HealthChecker(LoggerMixin):
     
     async def check_llm_health(self) -> HealthStatus:
         """Check LLM provider health."""
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             # Simple test to check if LLM configuration is valid
@@ -124,26 +126,25 @@ class HealthChecker(LoggerMixin):
                 return HealthStatus(
                     healthy=False,
                     message="LLM API key not configured",
-                    details={"provider": self.settings.llm_provider},
+                    details={"provider": self.settings.LLM_PROVIDER},
                     response_time_ms=0
                 )
             
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             return HealthStatus(
                 healthy=True,
                 message="LLM configuration is valid",
                 details={
-                    "provider": self.settings.llm_provider,
-                    "model": self.settings.llm_model,
-                    "base_url": self.settings.llm_base_url,
+                    "provider": self.settings.LLM_PROVIDER,
+                    "model": self.settings.LLM_MODEL,
                 },
                 response_time_ms=response_time
             )
             
         except Exception as e:
-            end_time = datetime.utcnow()
+            end_time = datetime.now(timezone.utc)
             response_time = (end_time - start_time).total_seconds() * 1000
             
             self.logger.error("LLM health check failed", error=str(e))
@@ -186,9 +187,9 @@ class HealthChecker(LoggerMixin):
         
         health_report = {
             "status": overall_status,
-            "timestamp": datetime.utcnow().isoformat(),
-            "version": self.settings.app_version,
-            "environment": self.settings.app_env,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "version": self.settings.APP_VERSION,
+            "environment": self.settings.APP_ENV,
             "components": {
                 "database": {
                     "healthy": database_health.healthy,

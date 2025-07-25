@@ -8,7 +8,7 @@ between entities in the knowledge graph.
 import logging
 import re
 from typing import Dict, List, Any, Optional, Tuple, Set, Union
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     from neo4j import AsyncGraphDatabase, AsyncDriver
@@ -131,7 +131,7 @@ class RelationshipManager:
             
             # Add timestamp if not present
             if "created_at" not in formatted_props:
-                formatted_props["created_at"] = datetime.utcnow().isoformat()
+                formatted_props["created_at"] = datetime.now(timezone.utc).isoformat()
             
             # Create relationship
             query = f"""

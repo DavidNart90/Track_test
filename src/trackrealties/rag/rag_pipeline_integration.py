@@ -5,7 +5,7 @@ Replace existing search.py implementation with optimized routing
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from .smart_search import (
@@ -563,7 +563,7 @@ class EnhancedRAGPipeline:
             return []
 
         try:
-            start_time = datetime.utcnow()
+            start_time = datetime.now(timezone.utc)
 
             # Determine optimal search strategy
             strategy = await self.smart_router.route_search(query, user_context)
@@ -573,7 +573,7 @@ class EnhancedRAGPipeline:
                 query, strategy, limit=limit, filters=filters
             )
 
-            response_time = (datetime.utcnow() - start_time).total_seconds()
+            response_time = (datetime.now(timezone.utc) - start_time).total_seconds()
 
             # Log search performance
             logger.info(

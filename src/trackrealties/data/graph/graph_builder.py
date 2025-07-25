@@ -9,7 +9,7 @@ import logging
 import asyncio
 import re
 from typing import Dict, Any, List, Optional, Tuple, Set
-from datetime import datetime
+from datetime import datetime, timezone
 
 try:
     from neo4j import AsyncGraphDatabase, AsyncDriver
@@ -263,7 +263,7 @@ class GraphBuilder:
             "created_date": property_data.get("createdDate"),
             "last_seen_date": property_data.get("lastSeenDate"),
             "source": property_data.get("mlsName"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Format content for better readability
@@ -323,7 +323,7 @@ class GraphBuilder:
             "county": property_data.get("county"),
             "latitude": property_data.get("latitude"),
             "longitude": property_data.get("longitude"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Format content for better readability
@@ -386,7 +386,7 @@ class GraphBuilder:
             "phone": listing_agent.get("phone"),
             "email": agent_email,
             "website": listing_agent.get("website"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Format content for better readability
@@ -444,7 +444,7 @@ class GraphBuilder:
             "phone": listing_office.get("phone"),
             "email": listing_office.get("email"),
             "website": listing_office.get("website"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Remove None values
@@ -512,7 +512,7 @@ class GraphBuilder:
                 "listed_date": event.get("listedDate"),
                 "removed_date": event.get("removedDate"),
                 "days_on_market": event.get("daysOnMarket"),
-                "created_at": datetime.utcnow().isoformat()
+                "created_at": datetime.now(timezone.utc).isoformat()
             }
             
             # Remove None values
@@ -567,7 +567,7 @@ class GraphBuilder:
             "city": market_data.get("city"),
             "state": market_data.get("state"),
             "county": market_data.get("county"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Remove None values
@@ -626,7 +626,7 @@ class GraphBuilder:
             "duration": market_data.get("duration"),
             "source": market_data.get("source"),
             "last_updated": market_data.get("last_updated"),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Format content for better readability
@@ -677,7 +677,7 @@ class GraphBuilder:
             "metric_id": metric_id,
             "name": metric_name,
             "value": metric_value,
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.now(timezone.utc).isoformat()
         }
         
         # Create or merge metric node
@@ -727,7 +727,7 @@ class GraphBuilder:
         
         # Add timestamp if not present
         if "created_at" not in properties:
-            properties["created_at"] = datetime.utcnow().isoformat()
+            properties["created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Create relationship
         query = f"""

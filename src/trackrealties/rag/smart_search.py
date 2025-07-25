@@ -7,7 +7,7 @@ import re
 import logging
 from typing import Dict, List, Any, Optional, Tuple
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 import asyncio
 
 logger = logging.getLogger(__name__)
@@ -331,7 +331,7 @@ class SmartSearchRouter:
         """
         Execute the determined search strategy
         """
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         try:
             if strategy == SearchStrategy.VECTOR_ONLY:
@@ -344,7 +344,7 @@ class SmartSearchRouter:
                 # Fallback to hybrid
                 results = await self.hybrid_search.search(query, limit=limit, filters=filters)
             
-            execution_time = (datetime.utcnow() - start_time).total_seconds()
+            execution_time = (datetime.now(timezone.utc) - start_time).total_seconds()
             logger.info(f"Search executed in {execution_time:.2f}s with {len(results)} results")
             
             return results

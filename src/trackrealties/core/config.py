@@ -13,9 +13,12 @@ class Settings(BaseSettings):
     APP_HOST: str = os.getenv("APP_HOST", "0.0.0.0")
     APP_PORT: int = int(os.getenv("APP_PORT", 8000))
     LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    APP_NAME: str = os.getenv("APP_NAME", "TrackRealties AI Platform")
+    APP_VERSION: str = os.getenv("APP_VERSION", "1.0.0")
     
     # PostgreSQL Database Settings
     DATABASE_URL: str = os.getenv("DATABASE_URL")
+    DB_POOL_SIZE: int = int(os.getenv("DB_POOL_SIZE", 10))
     POSTGRES_URI: Optional[str] = os.getenv("POSTGRES_URI", os.getenv("DATABASE_URL"))
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")
@@ -32,6 +35,7 @@ class Settings(BaseSettings):
     # OpenAI/LLM Settings
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    LLM_PROVIDER: str = os.getenv("LLM_PROVIDER", "openai")
     LLM_API_KEY: Optional[str] = os.getenv("LLM_API_KEY", os.getenv("OPENAI_API_KEY", ""))
     LLM_MODEL: str = os.getenv("LLM_MODEL", "gpt-3.5-turbo")
     DEFAULT_MODEL: str = os.getenv("DEFAULT_MODEL", "openai:gpt-4-turbo-preview")

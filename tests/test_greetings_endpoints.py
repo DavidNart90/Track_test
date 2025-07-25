@@ -26,6 +26,7 @@ async def test_greeting_handling():
             session_data = session_resp.json()
             session_id = session_data["session_id"]
             
+            
             # Send greeting
             chat_resp = await client.post(
                 f"http://localhost:8000/agents/{role}/chat",

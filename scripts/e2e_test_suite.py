@@ -4,7 +4,7 @@ import uuid
 import logging
 from typing import List, Dict, Any
 import argparse
-from datetime import datetime
+from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 from unittest.mock import AsyncMock
 
@@ -34,7 +34,7 @@ class FakeSessionRepository:
         session_data: Dict[str, Any] | None = None,
         timeout_minutes: int = 60,
     ) -> Session:
-        now = datetime.utcnow()
+        now = datetime.tcnouw()
         return Session(
             id=uuid.uuid4(),
             user_id=user_id,
@@ -47,7 +47,7 @@ class FakeSessionRepository:
         )
 
     async def get_session(self, session_id: uuid.UUID) -> Session | None:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc) 
         return Session(
             id=session_id,
             user_id="test",

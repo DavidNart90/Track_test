@@ -1,6 +1,6 @@
 """Market data models for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Literal, List
 from decimal import Decimal
 
@@ -146,7 +146,7 @@ class MarketDataPoint(BaseModel, TimestampMixin, SourceMixin, ValidationMixin):
     @property
     def is_current_period(self) -> bool:
         """Check if this data point represents the current period."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         return self.period_start <= now <= self.period_end
     
     def get_metric_value(self, metric_name: str) -> Optional[Any]:
@@ -241,7 +241,7 @@ class MarketInsights(BaseModel):
     """Derived insights from market data analysis."""
     
     region_id: str = Field(..., description="Region identifier")
-    analysis_date: datetime = Field(default_factory=datetime.utcnow, description="When analysis was performed")
+    analysis_date: datetime = Field(default_factory=datetime.now(timezone.utc), description="When analysis was performed")
     
     # Location information
     location: Optional[str] = Field(None, description="Location string")

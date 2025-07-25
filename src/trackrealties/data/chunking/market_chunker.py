@@ -4,7 +4,7 @@ Market data chunking implementation for the TrackRealties AI Platform.
 
 import logging
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...core.config import get_settings
 from .chunk import Chunk
@@ -316,7 +316,7 @@ Key Metrics:
     def _enrich_market_metadata(self, metadata: Dict[str, Any], market_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for market data chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add data quality score if available
         if "data_quality_score" in market_data:
@@ -336,7 +336,7 @@ Key Metrics:
     def _enrich_metrics_metadata(self, metadata: Dict[str, Any], metrics: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for metrics chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add price range if median price is available
         if "median_price" in metrics:
@@ -399,7 +399,7 @@ Key Metrics:
     def _enrich_history_metadata(self, metadata: Dict[str, Any], historical_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Enrich metadata for historical data chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add date range
         if historical_data:

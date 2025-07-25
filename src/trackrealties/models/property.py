@@ -1,6 +1,6 @@
 """Property data models for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Literal, List
 from decimal import Decimal
 
@@ -220,7 +220,7 @@ class PropertyListing(BaseModel, TimestampMixin, SourceMixin, ValidationMixin):
         if self.removed_date:
             return (self.removed_date - self.listed_date).days
         
-        return (datetime.utcnow() - self.listed_date).days
+        return (datetime.now(timezone.utc) - self.listed_date).days
     
     def get_price_history(self) -> list[tuple[datetime, Decimal]]:
         """Get chronological price history."""

@@ -4,7 +4,7 @@ Market data API routes for TrackRealties AI Platform.
 
 import logging
 from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
@@ -94,7 +94,7 @@ async def get_market_trends(
     """Get market trends for a specific region."""
     try:
         # Define time period
-        end_date = datetime.utcnow()
+        end_date = datetime.now(timezone.utc)
         if period == "1m":
             start_date = end_date - timedelta(days=30)
         elif period == "3m":

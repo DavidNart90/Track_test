@@ -1,6 +1,6 @@
 """Agent response and validation models for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Literal
 from uuid import UUID
 
@@ -300,14 +300,14 @@ class AgentContext(BaseModel):
     analysis_cache: Dict[str, Any] = Field(default_factory=dict, description="Cached analysis results")
     
     # Performance tracking
-    start_time: datetime = Field(default_factory=datetime.utcnow, description="Context creation time")
+    start_time: datetime = Field(default_factory=datetime.now(timezone.utc), description="Context creation time")
     
     def add_to_history(self, role: str, content: str, metadata: Optional[Dict[str, Any]] = None) -> None:
         """Add a message to conversation history."""
         self.conversation_history.append({
             "role": role,
             "content": content,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc)().isoformat(),
             "metadata": metadata or {}
         })
     
@@ -326,4 +326,4 @@ class AgentContext(BaseModel):
     @property
     def processing_time_ms(self) -> int:
         """Get current processing time in milliseconds."""
-        return int((datetime.utcnow() - self.start_time).total_seconds() * 1000)
+        return int((datetime.now(timezone.utc) - self.start_time).total_seconds() * 1000)

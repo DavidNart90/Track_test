@@ -63,6 +63,7 @@ async def agent_chat(
             session_id=session.id,
             role=MessageRole.ASSISTANT,
             content=agent_response.content,
+            tools_used=agent_response.tools_used,
             message_metadata={"tools_used": agent_response.tools_used}
         )
 

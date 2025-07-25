@@ -85,6 +85,7 @@ class TrackRealitiesEnhancedRAG(EnhancedRAGPipeline):
 
     async def _execute_smart_search(self, query: str, strategy: SearchStrategy):
         """Execute the search using the selected strategy."""
+        
         if strategy == SearchStrategy.VECTOR_ONLY:
             return await self.vector_search.search(query)
         elif strategy == SearchStrategy.GRAPH_ONLY:

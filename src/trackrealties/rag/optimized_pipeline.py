@@ -71,67 +71,51 @@ class GreetingDetector:
     @classmethod
     def is_greeting(cls, query: str) -> bool:
         """
-        Detect if a query is a greeting using multiple strategies
+        Check if the query is a greeting.
         """
-        # Normalize the query
-        normalized = query.lower().strip()
+        query = query.strip().lower()
         
-        # Remove punctuation for word-based checks
-        words_only = re.sub(r'[^\w\s]', ' ', normalized).split()
-        
-        # Strategy 1: Check against compiled patterns
+        # Check against compiled patterns
         for pattern in cls.COMPILED_PATTERNS:
-            if pattern.search(normalized):
+            if pattern.search(query):
                 return True
-        
-        # Strategy 2: Check if query is mostly greeting words
-        if len(words_only) <= 6:  # Short queries only
-            greeting_words = {'hi', 'hello', 'hey', 'how', 'are', 'you', 'good', 
-                            'morning', 'afternoon', 'evening', 'greetings', 'howdy',
-                            'whats', 'up', 'sup', 'hiya', 'yo'}
+                
+        # Check if query consists mostly of greeting context words
+        words = set(query.split())
+        greeting_words = words.intersection(cls.GREETING_CONTEXT_WORDS)
+        if len(greeting_words) / len(words) > 0.5:  # If more than half are greeting words
+            return True
             
-            # Count greeting-related words
-            greeting_word_count = sum(1 for word in words_only if word in greeting_words)
-            total_meaningful_words = sum(1 for word in words_only if word not in cls.GREETING_CONTEXT_WORDS)
-            
-            # If more than 50% of meaningful words are greeting words, it's likely a greeting
-            if total_meaningful_words > 0 and greeting_word_count / total_meaningful_words >= 0.5:
-                return True
-        
-        # Strategy 3: Check for greeting at start of query (even with other content)
-        if any(normalized.startswith(greeting) for greeting in ['hi ', 'hello ', 'hey ', 'greetings ']):
-            # But make sure it's not asking about a property or location
-            if not any(keyword in normalized for keyword in ['property', 'house', 'home', 'listing', 'price', 'bedroom', 'location']):
-                return True
-        
         return False
-    
+
     @classmethod
     def extract_greeting_intent(cls, query: str) -> Dict[str, Any]:
         """
-        Extract the type and context of the greeting
+        Extract greeting intent and metadata.
         """
-        normalized = query.lower().strip()
+        is_greeting = cls.is_greeting(query)
         
-        intent = {
-            "is_greeting": True,
-            "greeting_type": "general",
-            "expects_response_about": None,
-            "formality_level": "casual"
+        if is_greeting:
+            return {
+                "is_greeting": True,
+                "result": GreetingSearchResult(),
+                "metadata": {
+                    "intent": "greeting",
+                    "confidence": 1.0,
+                    "skip_search": True
+                }
+            }
+        
+        return {
+            "is_greeting": False,
+            "result": None,
+            "metadata": {
+                "intent": "other",
+                "confidence": 0.0,
+                "skip_search": False
+            }
         }
         
-        # Determine greeting type
-        if any(phrase in normalized for phrase in ['how are you', 'how r u', 'hows it going', 'how do you do']):
-            intent["greeting_type"] = "how_are_you"
-            intent["expects_response_about"] = "wellbeing"
-        elif any(phrase in normalized for phrase in ['good morning', 'good afternoon', 'good evening']):
-            intent["greeting_type"] = "time_based"
-            intent["formality_level"] = "formal"
-        elif any(phrase in normalized for phrase in ['whats up', 'sup', 'yo']):
-            intent["greeting_type"] = "casual"
-            intent["formality_level"] = "very_casual"
-        
-        return intent
 
 
 class GreetingSearchResult(SearchResult):
@@ -652,62 +636,44 @@ class EnhancedRAGPipeline:
     async def search(self, query: str, user_context: Optional[Dict] = None, 
                     limit: int = 10, filters: Optional[Dict] = None) -> List[SearchResult]:
         """
-        Main search method with intelligent routing
+        Enhanced search with greeting detection and smart routing
         """
-        if not self.initialized:
-            await self.initialize()
-
-        # Check if the query is a greeting
-        if self.greeting_detector.is_greeting(query):
-             # Log the greeting detection
-            logger.info(f"Greeting detected: '{query}'")
-            
-            # Get greeting context
-            greeting_context = self.greeting_detector.extract_greeting_intent(query)
-
-            # Return a special result that signals the agent to use greeting prompt
-            greeting_result = GreetingSearchResult()
-            greeting_result.metadata.update(greeting_context)
-
-                        # Log analytics if available
-            if self.analytics:
-                await self.analytics.log_search_execution(
-                    query, "greeting", [greeting_result], 0.0
-                )
-            # Return greeting result
-            return [greeting_result]
-
         try:
+            # Check for greeting first
+            greeting_check = self.greeting_detector.extract_greeting_intent(query)
+            if greeting_check["is_greeting"]:
+                # If it's a greeting, return the greeting result directly
+                return [greeting_check["result"]]
+
+            # If not a greeting, proceed with normal search
+            if not self.initialized:
+                await self.initialize()
+
             start_time = datetime.now(datetime.timezone.utc)
-
-            # Determine optimal search strategy
+            
+            # Get search strategy from router
             strategy = await self.smart_router.route_search(query, user_context)
-
+            
             # Execute search with selected strategy
             results = await self.smart_router.execute_search(
-                query, strategy, limit=limit, filters=filters
+                query=query,
+                strategy=strategy,
+                limit=limit,
+                filters=filters
             )
-
-            response_time = (datetime.now(datetime.timezone.utc) - start_time).total_seconds()
-
-            # Log search performance
-            logger.info(
-                f"Search completed: {len(results)} results using {strategy} in {response_time:.2f}s"
-            )
-
-            # Send analytics
+            
+            search_time = (datetime.now(datetime.timezone.utc) - start_time).total_seconds()
+            logger.info(f"Search completed: {len(results)} results using {strategy} in {search_time:.2f}s")
+            
             if self.analytics:
-                await self.analytics.log_search_execution(
-                    query, strategy, results, response_time
-                )
-
+                await self.analytics.record_search(query, strategy, len(results), search_time)
+            
             return results
             
         except Exception as e:
-            logger.error(f"Enhanced RAG search failed: {e}")
-            # Ultimate fallback
-            return await self.vector_search.search(query, limit=limit, filters=filters)
-
+            logger.error(f"Search failed: {e}", exc_info=True)
+            return []
+    
     async def generate_response(
         self,
         query: str,

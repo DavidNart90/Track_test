@@ -9,7 +9,7 @@ import logging
 import json
 import os
 from typing import Dict, Any, List, Optional, Union
-from datetime import datetime
+from datetime import datetime, timezone
 import traceback
 import uuid
 
@@ -44,12 +44,12 @@ def log_error(error: Exception, context: Dict[str, Any] = None) -> None:
     
     try:
         # Generate unique error ID
-        error_id = f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+        error_id = f"{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
         
         # Create error info
         error_info = {
             "error_id": error_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "error_type": type(error).__name__,
             "error_message": str(error),
             "traceback": traceback.format_exc(),
@@ -92,12 +92,12 @@ class ErrorLogger:
         """
         try:
             # Generate unique error ID
-            error_id = f"{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+            error_id = f"{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
             
             # Create error info
             error_info = {
                 "error_id": error_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "error_type": type(error).__name__,
                 "error_message": str(error),
                 "traceback": traceback.format_exc(),
@@ -134,7 +134,7 @@ class ErrorLogger:
         """
         try:
             # Generate unique error ID
-            error_id = f"validation_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+            error_id = f"validation_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
             
             # Redact sensitive fields if record data is provided
             redacted_data = None
@@ -144,7 +144,7 @@ class ErrorLogger:
             # Create error info
             error_info = {
                 "error_id": error_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "record_id": record_id,
                 "errors": errors,
                 "record_data": redacted_data
@@ -244,7 +244,7 @@ class ValidationTracker:
             # Create report
             report = {
                 "job_id": job_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "total_records": total_records,
                 "valid_records": valid_records,
                 "invalid_records": invalid_records,
@@ -375,7 +375,7 @@ class DataQualityMonitor:
             # Create report
             report = {
                 "job_id": job_id,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "quality_score": quality_score,
                 "validation_failure_rate": validation_failure_rate,
                 "processing_success_rate": processing_success_rate,
@@ -409,7 +409,7 @@ class DataQualityMonitor:
                 "quality_score": quality_report["quality_score"],
                 "issues": quality_report["issues"],
                 "recommendations": quality_report["recommendations"],
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             # Log alert

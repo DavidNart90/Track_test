@@ -5,7 +5,7 @@ Property listing chunking implementation for the TrackRealties AI Platform.
 import logging
 import re
 from typing import Dict, Any, List, Optional, Set
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...core.config import get_settings
 from .chunk import Chunk
@@ -504,7 +504,7 @@ Address Details:
     def _enrich_property_metadata(self, metadata: Dict[str, Any], property_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for property listing chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add price range
         price = property_data.get("price")
@@ -562,7 +562,7 @@ Address Details:
     def _enrich_location_metadata(self, metadata: Dict[str, Any], location_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for location chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add ZIP code
         if "zip_code" in location_data and location_data["zip_code"]:
@@ -594,7 +594,7 @@ Address Details:
     def _enrich_agent_metadata(self, metadata: Dict[str, Any], agent_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for agent chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         # Add agent information
         listing_agent = agent_data.get("listing_agent", {})
@@ -631,7 +631,7 @@ Address Details:
     def _enrich_property_history_metadata(self, metadata: Dict[str, Any], history_data: Dict[str, Any]) -> Dict[str, Any]:
         """Enrich metadata for property history chunk."""
         # Add timestamp
-        metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+        metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
         
         history = history_data.get("history", {})
         

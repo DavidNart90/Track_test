@@ -5,7 +5,7 @@ Base classes for all agents in the TrackRealties AI Platform.
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from pydantic import BaseModel, Field
 from pydantic_ai.agent import Agent as PydanticAI
@@ -16,7 +16,7 @@ from ..core.config import settings
 from ..models.agent import ValidationResult
 from pydantic_ai.models.openai import OpenAIModel
 from ..rag.pipeline import RAGPipeline
-from ..rag.optimized_pipeline import EnhancedRAGPipeline
+from ..rag.optimized_pipeline import EnhancedRAGPipeline, GreetingDetector
 from ..models.db import ConversationMessage, MessageRole
 from ..rag.pipeline import RAGPipeline
 from ..rag.rag_pipeline_integration import EnhancedRAGPipeline
@@ -158,21 +158,12 @@ class BaseAgent(ABC):
                 role=MessageRole.USER,
                 content=message,
                 session_id=session_id or "default",
-                created_at=datetime.utcnow(),
+                created_at=datetime.now(timezone.utc),
             )
             context.add_message(user_message)
 
-            # Search for relevant content using RAG pipeline
-            search_results = await self.dependencies.rag_pipeline.search(
-                message,
-                user_context={
-                    "user_role": user_role,
-                    "session_id": session_id,
-                    "history": [msg.content for msg in context.get_recent_messages(5)]
-                }
-            )
-
-            if search_results and len(search_results) > 0 and search_results[0].result_type == "greeting":
+            # Check for greeting first
+            if GreetingDetector.is_greeting(message):
                 logger.info(f"Processing greeting from {user_role or 'user'}")
 
                 # If greeting detected, respond with the greetings prompt
@@ -187,8 +178,12 @@ class BaseAgent(ABC):
                 greeting_prompt += role_context.get(user_role, "")
 
                 # Create temporary agent with greeting prompt
+                # Extract model name from the default model string (e.g., "openai:gpt-4")
+                model_name = settings.DEFAULT_MODEL.split(":")[-1] if isinstance(settings.DEFAULT_MODEL, str) else "gpt-4"
+                
                 greeting_agent = PydanticAI(
-                    self.model,
+                    model=model_name,  # Set the model name explicitly
+                    llm=self.llm,
                     system_prompt=greeting_prompt,
                     tools=[tool.as_function() for tool in self.tools.values()]
                 )
@@ -200,7 +195,10 @@ class BaseAgent(ABC):
                 # Create agent response
                 return AgentResponse(
                     content=response_content,
-                    tools_used=[{"tool": "greeting_handler", "input": message}],
+                    tools_used=[{
+                        "tool_name": "greeting_handler",
+                        "args": {"message": message}
+                    }],
                     confidence_score=1.0,
                     metadata={"response_type": "greeting", "user_role": user_role}
                 )

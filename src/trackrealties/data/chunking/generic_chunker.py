@@ -6,7 +6,7 @@ import logging
 import json
 import re
 from typing import Dict, Any, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from ...core.config import get_settings
 from .chunk import Chunk
@@ -55,7 +55,7 @@ class GenericChunker:
             "source": source,
             "chunk_type": "main",
             "content_type": "json",
-            "chunk_created_at": datetime.utcnow().isoformat(),
+            "chunk_created_at": datetime.now(timezone.utc).isoformat(),
             "data_keys": list(data.keys()),
             "data_size": len(json.dumps(data))
         }

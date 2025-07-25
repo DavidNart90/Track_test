@@ -1,6 +1,6 @@
 """Search models for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Literal, Union
 from uuid import UUID
 
@@ -77,7 +77,7 @@ class SearchResult(BaseModel):
         if not self.last_updated:
             return False
         
-        age_days = (datetime.utcnow() - self.last_updated).days
+        age_days = (datetime.now(timezone.utc)() - self.last_updated).days
         return age_days <= days
 
 
@@ -140,7 +140,7 @@ class GraphSearchResult(SearchResult):
     @property
     def is_current(self) -> bool:
         """Check if graph fact is currently valid."""
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         
         if self.valid_from and now < self.valid_from:
             return False

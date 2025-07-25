@@ -1,6 +1,6 @@
 """Base models for TrackRealties AI Platform."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional, List
 from uuid import UUID, uuid4
 
@@ -24,12 +24,12 @@ class CustomBaseModel(PydanticBaseModel):
 class TimestampMixin:
     """Mixin for models that need timestamp fields."""
     
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
     
     def update_timestamp(self) -> None:
         """Update the updated_at timestamp."""
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)()
 
 
 class UUIDMixin:
@@ -71,7 +71,7 @@ class ValidationMixin:
         """Mark as validated with optional errors."""
         self.is_validated = True
         self.validation_errors = errors or []
-        self.validation_timestamp = datetime.utcnow()
+        self.validation_timestamp = datetime.now(timezone.utc)
     
     def add_validation_error(self, error: str) -> None:
         """Add a validation error."""

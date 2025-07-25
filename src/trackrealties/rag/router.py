@@ -6,7 +6,7 @@ from __future__ import annotations
 import logging
 import re
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
 
 from ..models.search import SearchResult
@@ -231,7 +231,7 @@ class IntelligentQueryRouter:
         limit: int = 10,
         filters: Optional[Dict[str, Any]] = None,
     ) -> List[SearchResult]:
-        start = datetime.utcnow()
+        start = datetime.now(timezone.utc)
         try:
             if strategy == SearchStrategy.VECTOR_ONLY:
                 results = await self.vector_search.search(query, limit=limit, filters=filters)
@@ -240,7 +240,7 @@ class IntelligentQueryRouter:
             else:
                 results = await self.hybrid_search.search(query, limit=limit, filters=filters)
             logger.info(
-                "Search executed with %s strategy in %.2fs", strategy, (datetime.utcnow() - start).total_seconds()
+                "Search executed with %s strategy in %.2fs", strategy, (datetime.now(timezone.utc) - start).total_seconds()
             )
             return results
         except Exception as exc:

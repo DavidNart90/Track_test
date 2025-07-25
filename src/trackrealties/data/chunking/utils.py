@@ -4,7 +4,7 @@ Utility functions for the JSON Chunking System.
 
 import hashlib
 from typing import Dict, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def generate_chunk_id(content: str, prefix: str = "chunk") -> str:
@@ -22,7 +22,7 @@ def generate_chunk_id(content: str, prefix: str = "chunk") -> str:
     content_hash = hashlib.md5(content.encode()).hexdigest()[:12]
     
     # Create a timestamp
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     
     # Combine prefix, timestamp, and hash
     chunk_id = f"{prefix}_{timestamp}_{content_hash}"
@@ -41,6 +41,6 @@ def enrich_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
         Enriched metadata dictionary
     """
     # Add timestamp
-    metadata["chunk_created_at"] = datetime.utcnow().isoformat()
+    metadata["chunk_created_at"] = datetime.now(timezone.utc).isoformat()
     
     return metadata

@@ -1,41 +1,31 @@
-
 """
 API route for health checks.
 """
 
 import logging
-from datetime import datetime
-from fastapi import APIRouter, HTTPException
-from ...core.database import test_connection
-from ...core.graph import test_graph_connection
+from datetime import datetime, timezone
+from fastapi import APIRouter, HTTPException, Depends
+from ...core.health import get_health_checker, HealthChecker
 from ...models.api import HealthStatus
+from ...core.config import get_settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 @router.get("/", response_model=HealthStatus)
-async def health_check():
+async def health_check(health_checker: HealthChecker = Depends(get_health_checker)):
     """Health check endpoint."""
     try:
-        db_status = await test_connection()
-        graph_status = await test_graph_connection()
+        # Use the comprehensive system health check
+        health_report = await health_checker.check_system_health()
         
-        # Placeholder for other checks
-        llm_status = True # Assume ok for now
-
-        overall_status = "healthy"
-        if not db_status or not graph_status:
-            overall_status = "unhealthy"
-        elif not llm_status:
-            overall_status = "degraded"
-
         return HealthStatus(
-            status=overall_status,
-            database=db_status,
-            graph_database=graph_status,
-            llm_connection=llm_status,
-            version="0.1.0",
-            timestamp=datetime.utcnow()
+            status=health_report["status"],
+            database=health_report["components"]["database"]["healthy"],
+            graph_database=health_report["components"]["neo4j"]["healthy"],
+            llm_connection=health_report["components"]["llm"]["healthy"],
+            version=health_report["version"],
+            timestamp=datetime.fromisoformat(health_report["timestamp"])
         )
         
     except Exception as e:

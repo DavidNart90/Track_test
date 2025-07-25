@@ -6,7 +6,7 @@ Pydantic models representing database tables.
 import uuid
 from typing import Optional, Dict, Any, List
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -23,8 +23,8 @@ class Session(BaseModel):
     user_id: Optional[str] = None
     user_role: UserRole
     session_data: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=datetime.now(timezone.utc))
     expires_at: datetime
     is_active: bool = True
 
@@ -48,7 +48,7 @@ class ConversationMessage(BaseModel):
     processing_time_ms: Optional[int] = None
     token_count: Optional[int] = None
     message_metadata: Dict[str, Any] = Field(default_factory=dict)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.now(timezone.utc))
 
     class Config:
         orm_mode = True
