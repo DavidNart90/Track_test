@@ -49,6 +49,472 @@ class EnhancedSemanticChunker:
             'year': r'19\d{2}|20\d{2}'
         }
     
+    def _chunk_market_data_semantically(self, market_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+            """Create semantic chunks for market data with enhanced context"""
+            chunks = []
+            # 1. Market Overview Chunk (High Priority)
+            overview_content = self._extract_market_overview(market_data)
+            if overview_content:
+                chunks.append({
+                    'content': overview_content,
+                    'metadata': {
+                        'chunk_type': 'market_overview',
+                        'semantic_level': 'primary',
+                        'entity_types': ['location', 'price', 'volume'],
+                        'source': market_data.get('source', 'unknown'),
+                        'parent_context': market_data.get('region_id', market_data.get('location', 'unknown')),
+                        'semantic_score': self._calculate_semantic_score(overview_content, 'market_overview'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(overview_content)),
+                        'extracted_entities': self._extract_market_entities(market_data),
+                    }
+                })
+            
+            # 2. Geographic Location Chunk (NEW!)
+            geographic_content = self._extract_geographic_location(market_data)
+            if geographic_content:
+                chunks.append({
+                    'content': geographic_content,
+                    'metadata': {
+                        'chunk_type': 'geographic_location',
+                        'semantic_level': 'secondary',
+                        'entity_types': ['location', 'geography', 'coordinates'],
+                        'parent_context': market_data.get('region_id', market_data.get('location', 'unknown')),
+                        'source': market_data.get('source', 'unknown'),
+                        'semantic_score': self._calculate_semantic_score(geographic_content, 'geographic'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(geographic_content)),
+                        'extracted_entities': self._extract_geographic_entities(market_data),
+                    }
+                })
+            # 2. Price Trends Chunk
+            price_content = self._extract_price_trends(market_data)
+            if price_content:
+                chunks.append({
+                    'content': price_content,
+                    'metadata': {
+                        'chunk_type': 'price_trends',
+                        'semantic_level': 'secondary',
+                        'entity_types': ['price', 'trend', 'metrics'],
+                        'source': market_data.get('source', 'unknown'),
+                        'parent_context': market_data.get('region_id', market_data.get('location', 'unknown')),
+                        'semantic_score': self._calculate_semantic_score(price_content, 'price_trends'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(price_content)),
+                        'extracted_entities': self._extract_price_entities(market_data),
+                    }
+                })
+            # 3. Inventory Analysis Chunk
+            inventory_content = self._extract_inventory_analysis(market_data)
+            if inventory_content:
+                chunks.append({
+                    'content': inventory_content,
+                    'metadata': {
+                        'chunk_type': 'inventory_analysis',
+                        'semantic_level': 'tertiary',
+                        'entity_types': ['inventory', 'listing', 'metrics'],
+                        'parent_context': market_data.get('region_id', market_data.get('location', 'unknown')),
+                        'source': market_data.get('source', 'unknown'),
+                        'semantic_score': self._calculate_semantic_score(inventory_content, 'inventory_analysis'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(inventory_content)),
+                        'extracted_entities': self._extract_inventory_entities(market_data),
+                    }
+                })
+            return chunks
+    
+    def _extract_market_entities(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract entities from market data"""
+        entities = {}
+        
+        if 'median_home_price' in data or 'median_price' in data:
+            entities['median_price'] = data.get('median_home_price', data.get('median_price'))
+        if 'sales_volume' in data:
+            entities['sales_volume'] = data['sales_volume']
+        if 'location' in data:
+            entities['location'] = data['location']
+        
+        return entities
+
+    def _extract_geographic_entities(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract geographic entities"""
+        entities = {}
+        
+        location = data.get('location', data.get('region_name', ''))
+        if location:
+            region, county = self._parse_location_string(location)
+            if region:
+                entities['region'] = region
+            if county:
+                entities['county'] = county
+        
+        if 'city' in data:
+            entities['city'] = data['city']
+        if 'state' in data:
+            entities['state'] = data['state']
+        if 'latitude' in data and 'longitude' in data:
+            entities['coordinates'] = f"{data['latitude']}, {data['longitude']}"
+        
+        return entities
+
+    def _extract_price_entities(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract price-related entities"""
+        entities = {}
+        
+        if 'price_per_sqft_median' in data:
+            entities['price_per_sqft'] = data['price_per_sqft_median']
+        if 'price_change_monthly' in data:
+            entities['monthly_change'] = data['price_change_monthly']
+        if 'price_change_yearly' in data:
+            entities['yearly_change'] = data['price_change_yearly']
+        
+        return entities
+
+    def _extract_inventory_entities(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract inventory-related entities"""
+        entities = {}
+        
+        if 'inventory_count' in data:
+            entities['inventory_count'] = data['inventory_count']
+        if 'days_on_market_median' in data:
+            entities['days_on_market'] = data['days_on_market_median']
+        if 'months_supply' in data:
+            entities['months_supply'] = data['months_supply']
+        if 'new_listings' in data:
+            entities['new_listings'] = data['new_listings']
+        
+        return entities
+    
+    def _extract_market_overview(self, data: Dict[str, Any]) -> str:
+        """Extract market overview information"""
+        content = "MARKET OVERVIEW:\n"
+
+        # Location info 
+        location = data.get('location', data.get('region_name', 'Unknown Location'))
+        content += f"Location: {location}\n"
+
+        # Date info
+        date = data.get('date', data.get('data_date',''))
+        if date:
+            content += f"Date: {date}\n"
+        
+        # Core metrics
+        if 'median_home_price' in data or 'median_price' in data:
+            price = data.get('median_home_price', data.get('median_price'))
+            content += f"Median Price: ${price:,.2f}\n"
+        
+        # Sales data
+        if 'homes_sold' in data or 'sales_volume' in data:
+            sales = data.get('homes_sold', data.get('sales_volume'))
+            content += f"Sales Volume: {sales}\n"
+        
+        return content
+    
+    def _extract_price_trends(self, data: Dict[str, Any]) -> str:
+        """Extract price trend information"""
+        content = "PRICE TRENDS:\n"
+
+        # Price per sqft
+        if 'price_per_sqft_median' in data or 'price_per_sqft' in data:
+            price_sqft = data.get('price_per_sqft_median', data.get('price_per_sqft'))
+            content += f"Price Per Sqft: ${price_sqft:.2f}\n"
+        # Price changes
+        if 'price_change_monthly' in data:
+            monthly = data['price_change_monthly'] * 100
+            content += f"Monthly Change: {monthly:+.1f}%\n"
+
+        if 'price_change_yearly' in data:
+            yearly = data['price_change_yearly'] * 100
+            content += f"Yearly Change: {yearly:+.1f}%\n"
+        
+        return content
+    
+    def _extract_inventory_analysis(self, data: Dict[str, Any]) -> str:
+        """Extract inventory analysis information"""
+        content = "INVENTORY ANALYSIS:\n"
+
+        # Inventory count
+        if 'inventory_count' in data:
+            content += f"Inventory Count: {data['inventory_count']}\n"
+        
+        # Days on market
+        if 'days_on_market_median' in data or 'days_on_market' in data:
+            dom = data.get('days_on_market_median', data.get('days_on_market'))
+            content += f"Days on Market: {dom}\n"
+        
+        # Months supply
+        if 'months_supply' in data:
+            content += f"Months Supply: {data['months_supply']}\n"
+        
+        # New listings
+        if 'new_listings' in data:
+            content += f"New Listings: {data['new_listings']}\n"
+        return content
+    
+    def _extract_geographic_location(self, data: Dict[str, Any]) -> str:
+        """Extract geographic location information with region and county parsing"""
+        content = "GEOGRAPHIC LOCATION:\n"
+        
+        # Get location string and parse it
+        location = data.get('location', data.get('region_name', ''))
+        
+        if location:
+            # Parse region and county from location string
+            region, county = self._parse_location_string(location)
+            
+            if region:
+                content += f"Region: {region}\n"
+            if county:
+                content += f"County: {county}\n"
+            
+            content += f"Full Location: {location}\n"
+        
+        # Basic location info
+        if 'city' in data:
+            content += f"City: {data['city']}\n"
+        if 'state' in data:
+            content += f"State: {data['state']}\n"
+
+        # Coordinates
+        if 'latitude' in data and 'longitude' in data:
+            content += f"Coordinates: {data['latitude']}, {data['longitude']}\n"
+        
+        return content
+
+    def _parse_location_string(self, location: str) -> Tuple[str, str]:
+        """Parse region and county from location string like 'Ruston, LA metro area'"""
+        region = ""
+        county = ""
+        
+        if not location:
+            return region, county
+        
+        # Common patterns for parsing location strings
+        location_lower = location.lower()
+        
+        # Extract region (city/area name)
+        if ',' in location:
+            parts = location.split(',')
+            region = parts[0].strip()  # "Ruston"
+            
+            # Look for county indicators in remaining parts
+            remaining = ','.join(parts[1:]).strip()
+            
+            # Check for county patterns
+            county_patterns = [
+                r'(\w+)\s+county',
+                r'(\w+)\s+co\.',
+                r'(\w+)\s+parish',  # Louisiana uses parishes
+            ]
+            
+            for pattern in county_patterns:
+                import re
+                match = re.search(pattern, remaining, re.IGNORECASE)
+                if match:
+                    county = match.group(1).strip()
+                    break
+            
+            # If no county found but we have state info, try to infer
+            if not county and len(parts) >= 2:
+                state_part = parts[1].strip()
+                # If it's just state code, the region might include county info
+                if len(state_part) == 2:  # State code like "LA"
+                    # For Louisiana, many areas are parishes
+                    if state_part.upper() == 'LA':
+                        county = f"{region} Parish"
+        else:
+            region = location
+        
+        return region, county
+
+
+    def _chunk_generic_semantically(self, data: Dict[str, Any], data_type: str = "generic") -> List[Dict[str, Any]]:
+        """Create semantic chunks for generic data"""
+        chunks = []
+    
+        # 1. Main Data Chunk
+        main_content = self._extract_generic_main_content(data)
+        if main_content:
+            chunks.append({
+                'content': main_content,
+                'metadata': {
+                    'chunk_type': 'generic_main',
+                    'semantic_level': 'primary',
+                    'entity_types': self._extract_entity_types_from_data(data),
+                    'parent_context': data.get('id', data.get('identifier', 'unknown')),
+                    'semantic_score': self._calculate_semantic_score(main_content, 'generic'),
+                    'chunk_created_at': datetime.now().isoformat(),
+                    'token_count': len(self.tokenizer.encode(main_content)),
+                    'data_type': data_type,
+                    'data_keys': list(data.keys()) if isinstance(data, dict) else []
+                }
+            })
+        
+        # 2. If data is large, create additional chunks for complex nested objects
+        if isinstance(data, dict) and len(str(data)) > self.max_chunk_size:
+            nested_chunks = self._chunk_large_generic_data(data, data_type)
+            chunks.extend(nested_chunks)
+        
+        return chunks
+
+    def _extract_generic_main_content(self, data: Dict[str, Any]) -> str:
+        """Extract main content from generic data"""
+        content = "DATA SUMMARY:\n"
+        
+        # Handle the data based on its structure
+        if isinstance(data, dict):
+            # Prioritize important fields first
+            important_fields = ['id', 'name', 'title', 'description', 'type', 'status', 'date', 'created_at', 'updated_at']
+            
+            # Add important fields first
+            for field in important_fields:
+                if field in data and data[field] is not None:
+                    formatted_field = field.replace('_', ' ').title()
+                    value = data[field]
+                    
+                    # Format specific field types
+                    if 'date' in field.lower() or 'time' in field.lower():
+                        content += f"{formatted_field}: {value}\n"
+                    elif isinstance(value, (int, float)) and any(keyword in field.lower() for keyword in ['price', 'cost', 'amount', 'fee']):
+                        content += f"{formatted_field}: ${value:,.2f}\n"
+                    elif isinstance(value, str) and len(value) > 100:
+                        # Truncate long text fields
+                        content += f"{formatted_field}: {value[:100]}...\n"
+                    else:
+                        content += f"{formatted_field}: {value}\n"
+            
+            # Add other fields (excluding the ones already processed)
+            remaining_fields = [k for k in data.keys() if k not in important_fields]
+            for field in remaining_fields[:10]:  # Limit to first 10 remaining fields
+                if data[field] is not None:
+                    formatted_field = field.replace('_', ' ').title()
+                    value = data[field]
+                    
+                    # Skip complex nested objects for main content
+                    if isinstance(value, (dict, list)):
+                        if isinstance(value, list):
+                            content += f"{formatted_field}: {len(value)} items\n"
+                        else:
+                            content += f"{formatted_field}: {len(value)} properties\n"
+                    else:
+                        # Handle simple values
+                        if isinstance(value, str) and len(value) > 50:
+                            content += f"{formatted_field}: {value[:50]}...\n"
+                        else:
+                            content += f"{formatted_field}: {value}\n"
+        
+        return content
+
+    def _chunk_large_generic_data(self, data: Dict[str, Any], data_type: str) -> List[Dict[str, Any]]:
+        """Create additional chunks for large generic data with nested objects"""
+        chunks = []
+        
+        # Look for complex nested objects that deserve their own chunks
+        for key, value in data.items():
+            if isinstance(value, dict) and len(str(value)) > 200:
+                # Create a chunk for this nested object
+                nested_content = self._format_nested_object(key, value)
+                
+                chunks.append({
+                    'content': nested_content,
+                    'metadata': {
+                        'chunk_type': 'generic_nested',
+                        'semantic_level': 'secondary',
+                        'entity_types': [key.lower(), 'nested_data'],
+                        'parent_context': data.get('id', data.get('identifier', 'unknown')),
+                        'nested_field': key,
+                        'semantic_score': self._calculate_semantic_score(nested_content, 'nested'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(nested_content)),
+                        'data_type': data_type
+                    }
+                })
+            
+            elif isinstance(value, list) and len(value) > 5:
+                # Create a chunk for large lists
+                list_content = self._format_list_data(key, value)
+                
+                chunks.append({
+                    'content': list_content,
+                    'metadata': {
+                        'chunk_type': 'generic_list',
+                        'semantic_level': 'secondary',
+                        'entity_types': [key.lower(), 'list_data'],
+                        'parent_context': data.get('id', data.get('identifier', 'unknown')),
+                        'list_field': key,
+                        'list_size': len(value),
+                        'semantic_score': self._calculate_semantic_score(list_content, 'list'),
+                        'chunk_created_at': datetime.now().isoformat(),
+                        'token_count': len(self.tokenizer.encode(list_content)),
+                        'data_type': data_type
+                    }
+                })
+        
+        return chunks
+
+    def _format_nested_object(self, key: str, obj: Dict[str, Any]) -> str:
+        """Format a nested object for chunking"""
+        content = f"{key.replace('_', ' ').title().upper()}:\n\n"
+        
+        for sub_key, sub_value in obj.items():
+            formatted_key = sub_key.replace('_', ' ').title()
+            
+            if isinstance(sub_value, (dict, list)):
+                if isinstance(sub_value, list):
+                    content += f"{formatted_key}: {len(sub_value)} items\n"
+                else:
+                    content += f"{formatted_key}: {len(sub_value)} properties\n"
+            elif isinstance(sub_value, str) and len(sub_value) > 100:
+                content += f"{formatted_key}: {sub_value[:100]}...\n"
+            else:
+                content += f"{formatted_key}: {sub_value}\n"
+        
+        return content
+
+    def _format_list_data(self, key: str, lst: List[Any]) -> str:
+        """Format list data for chunking"""
+        content = f"{key.replace('_', ' ').title().upper()} ({len(lst)} items):\n\n"
+        
+        # Show first few items
+        for i, item in enumerate(lst[:5]):
+            if isinstance(item, dict):
+                # For dict items, show key info
+                content += f"Item {i+1}:\n"
+                for item_key, item_value in list(item.items())[:3]:  # First 3 keys
+                    formatted_key = item_key.replace('_', ' ').title()
+                    content += f"  {formatted_key}: {item_value}\n"
+            else:
+                content += f"Item {i+1}: {item}\n"
+        
+        if len(lst) > 5:
+            content += f"... and {len(lst) - 5} more items\n"
+        
+        return content
+
+    def _extract_entity_types_from_data(self, data: Dict[str, Any]) -> List[str]:
+        """Extract entity types from generic data based on field names"""
+        entity_types = ['data']
+        
+        # Look for common entity indicators in field names
+        field_indicators = {
+            'user': ['user', 'person', 'customer', 'client'],
+            'location': ['address', 'city', 'state', 'country', 'location', 'geo'],
+            'financial': ['price', 'cost', 'amount', 'fee', 'payment', 'revenue'],
+            'temporal': ['date', 'time', 'created', 'updated', 'timestamp'],
+            'contact': ['email', 'phone', 'contact', 'website'],
+            'product': ['product', 'item', 'service', 'offering'],
+            'organization': ['company', 'organization', 'business', 'agency']
+        }
+        
+        if isinstance(data, dict):
+            field_names = [key.lower() for key in data.keys()]
+            
+            for entity_type, indicators in field_indicators.items():
+                if any(indicator in field_name for field_name in field_names for indicator in indicators):
+                    entity_types.append(entity_type)
+        
+        return entity_types
+            
     def chunk_with_semantic_awareness(self, data: Dict[str, Any], data_type: str) -> List[Dict[str, Any]]:
         """
         Create semantically aware chunks with relationship mapping

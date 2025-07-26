@@ -114,7 +114,7 @@ class DatabaseIntegration:
                         except Exception as inner_e:
                             # Log the specific error but let the outer transaction handle the rollback
                             self.logger.error(f"Error during transaction: {inner_e}")
-                            raise
+                            raise inner_e
                     
         except Exception as e:
             # Use the error handler to classify and log the error
@@ -188,7 +188,7 @@ class DatabaseIntegration:
                         except Exception as inner_e:
                             # Log the specific error but let the outer transaction handle the rollback
                             self.logger.error(f"Error during transaction: {inner_e}")
-                            raise
+                            raise inner_e
                     
         except Exception as e:
             # Use the error handler to classify and log the error
@@ -289,11 +289,14 @@ class DatabaseIntegration:
         Returns:
             UUID of the inserted property listing record
         """
-        # Extract property ID or generate one
-        property_id = property_data.get("id")
-        if not property_id:
+        # Extrac property ID and Convert to UUID
+        property_string_id = property_data.get("id")
+        if not property_string_id:
             raise ValueError("Property ID is required")
         
+        property_id = uuid.uuid5(
+            uuid.NAMESPACE_DNS, property_string_id
+        )
         # Extract address components
         formatted_address = property_data.get("formattedAddress")
         if not formatted_address:
@@ -307,7 +310,6 @@ class DatabaseIntegration:
             latest_event = history[latest_event_date]
             listing_type = latest_event.get("event", listing_type)
 
-        
         try:
             # Insert property listing
             query = """
@@ -328,7 +330,7 @@ class DatabaseIntegration:
             
             result = await conn.fetchval(
                 query,
-                property_data.get("id"),
+                property_id,
                 property_data.get("formattedAddress"),
                 property_data.get("addressLine1"),
                 property_data.get("addressLine2"),
@@ -360,15 +362,15 @@ class DatabaseIntegration:
             )
             
             return result
-            
+        
         except Exception as e:
-            # Handle specific Neon DB errors
+        # Handle specific Neon DB errors
             if "duplicate key value violates unique constraint" in str(e):
-                self.logger.warning(f"Property listing with property_id {property_id} already exists: {e}")
+                self.logger.warning(f"Property listing with property_id {property_string_id} already exists: {e}")
                 
                 # Try to get the existing record ID
                 try:
-                    query = "SELECT id FROM property_listings WHERE property_id = $1 LIMIT 1"
+                    query = "SELECT id FROM property_listings WHERE id = $1 LIMIT 1"
                     existing_id = await conn.fetchval(query, property_id)
                     
                     if existing_id:
@@ -376,41 +378,66 @@ class DatabaseIntegration:
                         return existing_id
                 except Exception as inner_e:
                     self.logger.error(f"Failed to get existing property listing record: {inner_e}")
+        
+        # Re-raise the exception for the caller to handle
+        raise
             
-            # Re-raise the exception for the caller to handle
-            raise
     async def _save_market_chunks(self, conn, market_data_id: UUID, chunks: List[Chunk]) -> List[UUID]:
         """
-        Save market data chunks to the database.
-
-        Args:
-            conn: Database connection
-            market_data_id: UUID of the parent market data record
-            chunks: List of chunks to save
-
-        Returns:
-            List of UUIDs of the inserted chunk records
+        Save market data chunks to the database with all enhanced fields.
         """
         chunk_ids = []
         for i, chunk in enumerate(chunks):
+            # Extract additional fields from the original market data
+            market_region = None
+            data_source = None
+            report_date = datetime.now().date()  # Current date of ingestion
+            
+            # Try to get market_region from chunk metadata or content
+            if chunk.metadata:
+                # Extract from parent context or derive from content
+                parent_context = chunk.metadata.get('parent_context', '')
+                if parent_context:
+                    market_region = str(parent_context)
+                
+                # Get data source
+                data_source = chunk.metadata.get('source', 'unknown')
+            
+            # Extract entities and entity types from metadata
+            extracted_entities = chunk.metadata.get('extracted_entities', {})
+            entity_types = chunk.metadata.get('entity_types', [])
+            
+            # Get chunk_type and semantic_score from metadata
+            chunk_type = chunk.metadata.get('chunk_type', 'unknown')
+            semantic_score = chunk.metadata.get('semantic_score', 0.0)
+            
             query = """
             INSERT INTO market_chunks_enhanced (
-                market_data_id, content, chunk_index, token_count, embedding, metadata
-            ) VALUES ($1, $2, $3, $4, $5, $6)
+                market_data_id, content, chunk_index, token_count, embedding, 
+                metadata, market_region, data_source, report_date, 
+                extracted_entities, entity_types, chunk_type, semantic_score
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
             RETURNING id
             """
+            
             chunk_id = await conn.fetchval(
                 query,
                 market_data_id,
                 chunk.content,
                 i,
-                chunk.metadata.get("token_count"),
+                chunk.metadata.get("token_count", 0),
                 str(chunk.embedding) if chunk.embedding else None,
-                json.dumps(chunk.metadata or {})
+                json.dumps(chunk.metadata or {}),
+                market_region,
+                data_source,
+                report_date,
+                json.dumps(extracted_entities),
+                entity_types,
+                chunk_type,
+                float(semantic_score)
             )
             chunk_ids.append(chunk_id)
         return chunk_ids
-
     async def _save_property_chunks(self, conn, property_id: str, chunks: List[Chunk]) -> List[UUID]:
         """
         Save property listing chunks to the database.
@@ -436,7 +463,7 @@ class DatabaseIntegration:
                 property_id,
                 chunk.content,
                 i,
-                chunk.metadata.get("token_count"),
+                chunk.metadata.get("token_count", 0),
                 str(chunk.embedding) if chunk.embedding else None,
                 json.dumps(chunk.metadata or {})
             )

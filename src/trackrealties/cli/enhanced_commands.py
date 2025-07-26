@@ -22,7 +22,7 @@ settings = get_settings()
 
 @click.command()
 @click.argument('file_path', type=click.Path(exists=True))
-@click.option('--data-type', type=click.Choice(['market', 'property']), required=True,
+@click.option('--data-type', type=click.Choice(['market', 'property', 'market_data','property_listing']), required=True,
               help='Type of data to ingest (market data or property listings)')
 @click.option('--source', default='cli', help='Source of the data')
 @click.option('--batch-size', default=100, type=int, help='Number of records to process in a batch')
@@ -69,7 +69,7 @@ def enhanced_ingest(file_path, data_type, source, batch_size, dry_run, skip_embe
             if dry_run:
                 click.echo("Dry run mode - validating data without saving to database")
                 
-                if data_type == 'market':
+                if data_type == 'market_data':
                     click.echo(f"Validating {len(data)} market data records...")
                     result = await pipeline.validate_market_data(source, data)
                 else:  # property
@@ -80,7 +80,7 @@ def enhanced_ingest(file_path, data_type, source, batch_size, dry_run, skip_embe
                 _display_validation_results(result)
             else:
                 # Process data
-                if data_type == 'market':
+                if data_type == 'market_data':
                     click.echo(f"Processing {len(data)} market data records...")
                     if skip_embeddings:
                         click.echo("Skipping embedding generation")

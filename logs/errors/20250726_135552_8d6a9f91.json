@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135552_8d6a9f91",
+  "timestamp": "2025-07-26T13:55:52.451576+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Pacific County, WA",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 459000.0,
+      "inventory_count": 237.0,
+      "sales_volume": 8.0,
+      "new_listings": 8.0,
+      "days_on_market": 58.0,
+      "months_supply": 29.625,
+      "price_per_sqft": 278.989411544,
+      "county": "Pacific County, WA",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "3094",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Pacific County",
+      "state": "WA"
+    }
+  }
+}

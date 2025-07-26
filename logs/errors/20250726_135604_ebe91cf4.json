@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135604_ebe91cf4",
+  "timestamp": "2025-07-26T13:56:04.880347+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Trousdale County, TN",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 579950.0,
+      "inventory_count": 51.0,
+      "sales_volume": 4.0,
+      "new_listings": 2.0,
+      "days_on_market": 134.0,
+      "months_supply": 12.75,
+      "price_per_sqft": 241.985447043,
+      "county": "Trousdale County, TN",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "2629",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Trousdale County",
+      "state": "TN"
+    }
+  }
+}

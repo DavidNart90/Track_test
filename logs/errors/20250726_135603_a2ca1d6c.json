@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135603_a2ca1d6c",
+  "timestamp": "2025-07-26T13:56:03.410575+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Carroll County, AR",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 409500.0,
+      "inventory_count": 195.0,
+      "sales_volume": 6.0,
+      "new_listings": 8.0,
+      "days_on_market": 189.0,
+      "months_supply": 32.5,
+      "price_per_sqft": 236.806555088,
+      "county": "Carroll County, AR",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "235",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Carroll County",
+      "state": "AR"
+    }
+  }
+}

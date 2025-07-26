@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135520_f70bdd3e",
+  "timestamp": "2025-07-26T13:55:20.111539+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Pike County, MO",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 225500.0,
+      "inventory_count": 43.0,
+      "sales_volume": 2.0,
+      "new_listings": 1.0,
+      "days_on_market": 170.0,
+      "months_supply": 21.5,
+      "price_per_sqft": 146.129106363,
+      "county": "Pike County, MO",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "1681",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Pike County",
+      "state": "MO"
+    }
+  }
+}

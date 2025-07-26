@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135627_7284824c",
+  "timestamp": "2025-07-26T13:56:27.772477+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Valencia County, NM",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 293000.0,
+      "inventory_count": 212.0,
+      "sales_volume": 15.0,
+      "new_listings": 10.0,
+      "days_on_market": 34.0,
+      "months_supply": 14.133333333,
+      "price_per_sqft": 191.666666667,
+      "county": "Valencia County, NM",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "1944",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Valencia County",
+      "state": "NM"
+    }
+  }
+}

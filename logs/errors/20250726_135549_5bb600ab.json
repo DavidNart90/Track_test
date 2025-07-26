@@ -1,0 +1,28 @@
+{
+  "error_id": "20250726_135549_5bb600ab",
+  "timestamp": "2025-07-26T13:55:49.282271+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Union City, TN metro area",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 194143.5,
+      "inventory_count": 90.0,
+      "sales_volume": 4.0,
+      "new_listings": 2.0,
+      "days_on_market": 41.5,
+      "months_supply": 22.5,
+      "price_per_sqft": 103.805200668,
+      "source": "redfin",
+      "region_type": "metro",
+      "region_id": "46460",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Union City",
+      "state": "TN"
+    }
+  }
+}

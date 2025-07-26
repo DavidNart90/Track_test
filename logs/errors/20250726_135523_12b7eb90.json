@@ -1,0 +1,28 @@
+{
+  "error_id": "20250726_135523_12b7eb90",
+  "timestamp": "2025-07-26T13:55:23.919584+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Ruston, LA metro area",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 271635.0,
+      "inventory_count": 111.0,
+      "sales_volume": 5.0,
+      "new_listings": 7.0,
+      "days_on_market": 33.0,
+      "months_supply": 22.2,
+      "price_per_sqft": 161.085842409,
+      "source": "redfin",
+      "region_type": "metro",
+      "region_id": "40820",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Ruston",
+      "state": "LA"
+    }
+  }
+}

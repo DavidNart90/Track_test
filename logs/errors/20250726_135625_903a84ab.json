@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135625_903a84ab",
+  "timestamp": "2025-07-26T13:56:25.022845+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Adams County, IL",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 196450.0,
+      "inventory_count": 162.0,
+      "sales_volume": 16.0,
+      "new_listings": 7.0,
+      "days_on_market": 44.5,
+      "months_supply": 10.125,
+      "price_per_sqft": 115.361122781,
+      "county": "Adams County, IL",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "712",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Adams County",
+      "state": "IL"
+    }
+  }
+}

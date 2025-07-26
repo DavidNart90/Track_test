@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135518_f376b87d",
+  "timestamp": "2025-07-26T13:55:18.247943+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Barbour County, WV",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 70000.0,
+      "inventory_count": 25.0,
+      "sales_volume": 1.0,
+      "new_listings": 3.0,
+      "days_on_market": 389.0,
+      "months_supply": 25.0,
+      "price_per_sqft": 59.829059829,
+      "county": "Barbour County, WV",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "3108",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Barbour County",
+      "state": "WV"
+    }
+  }
+}

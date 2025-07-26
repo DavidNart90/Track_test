@@ -14,6 +14,7 @@ from .chunk import Chunk
 from .market_chunker import MarketDataChunker
 from .property_chunker import PropertyListingChunker
 from .generic_chunker import GenericChunker
+from .utils import generate_chunk_id
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -90,21 +91,40 @@ class JSONChunker:
         
         Args:
             data: JSON data dictionary
-            data_type: Type of data ('market_data', 'property_listing', or other)
+            data_type: Type of the data (e.g., 'market', 'property', 'generic')
             
         Returns:
             List of chunks
         """
         self.logger.info(f"Chunking JSON data of type {data_type}")
-        
-        if data_type == "market_data":
-            return self.chunk_market_data(data)
-        elif data_type == "property_listing":
-            return self.chunk_property_listing(data)
-        else:
-            # For unknown data types, use generic chunking
-            return self.generic_chunker.chunk_generic_json(data, data_type)
-    
+        try:
+            if data_type in ["market_data", "market"]:
+                enhanced_chunks = self.enhanced_chunker.chunk_with_semantic_awareness(data, "market_data")
+            elif data_type in ["property_listing", "property"]:
+                enhanced_chunks = self.enhanced_chunker.chunk_with_semantic_awareness(data, "property_listing")
+            else:
+                enhanced_chunks = self.enhanced_chunker.chunk_with_semantic_awareness(data, data_type)
+            # Convert enhanced chunks to Chunk objects
+            chunks = []
+            for chunk_data in enhanced_chunks:
+                chunk = Chunk(
+                    chunk_id=generate_chunk_id(chunk_data['content'], data_type),
+                    content=chunk_data['content'],
+                    metadata=chunk_data['metadata']
+                )
+                chunks.append(chunk)
+            self.logger.info(f"Enhanced chunking created {len(chunks)} semantic chunks")
+            return chunks
+        except Exception as e:
+            self.logger.warning(f"Enhanced chunking failed, falling back to standard: {e}")
+            # Fallback to standard chunking
+            if data_type == "market_data":
+                return self.market_chunker.chunk_market_data(data)
+            elif data_type == "property_listing":
+                return self.property_chunker.chunk_property_listing(data)
+            else:
+                return self.generic_chunker.chunk_generic_json(data, data_type)  
+ 
     def _get_price_range(self, price: float) -> str:
         """Get price range bucket for a given price."""
         return self.property_chunker._get_price_range(price)

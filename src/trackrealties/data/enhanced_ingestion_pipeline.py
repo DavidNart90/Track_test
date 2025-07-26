@@ -195,7 +195,7 @@ class EnhancedIngestionPipeline:
                 except Exception as e:
                     result.failed += 1
                     result.errors.append(f"Error processing record: {str(e)}")
-                    log_error(e, {"source": source, "record": record})
+                    self.logger.error(f"Error processing record from {source}: {str(e)}")
         
         self.logger.info(
             f"Market data ingestion complete: {result.processed}/{result.total} processed, "
@@ -267,7 +267,7 @@ class EnhancedIngestionPipeline:
                 except Exception as e:
                     result.failed += 1
                     result.errors.append(f"Error processing record: {str(e)}")
-                    log_error(e, {"source": source, "record": record})
+                    self.logger.error(f"Error processing record from {source}: {str(e)}")
         
         self.logger.info(
             f"Property listings ingestion complete: {result.processed}/{result.total} processed, "

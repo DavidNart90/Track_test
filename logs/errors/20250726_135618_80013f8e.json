@@ -1,0 +1,29 @@
+{
+  "error_id": "20250726_135618_80013f8e",
+  "timestamp": "2025-07-26T13:56:18.831998+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "Clay County, AR",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 157500.0,
+      "inventory_count": 90.0,
+      "sales_volume": 2.0,
+      "new_listings": 9.0,
+      "days_on_market": 220.0,
+      "months_supply": 45.0,
+      "price_per_sqft": 80.661585622,
+      "county": "Clay County, AR",
+      "source": "redfin",
+      "region_type": "county",
+      "region_id": "238",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "Clay County",
+      "state": "AR"
+    }
+  }
+}

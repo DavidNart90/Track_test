@@ -41,7 +41,7 @@ def data():
 # Enhanced ingestion command
 @cli.command("enhanced-ingest")
 @click.argument('file_path', type=click.Path(exists=True))
-@click.option('--data-type', type=click.Choice(['market', 'property']), required=True,
+@click.option('--data-type', type=click.Choice(['market', 'property', 'market_data', 'property_listing']), required=True,
               help='Type of data to ingest (market data or property listings)')
 @click.option('--source', default='cli', help='Source of the data')
 @click.option('--batch-size', default=100, type=int, help='Number of records to process in a batch')
@@ -87,7 +87,7 @@ def enhanced_ingest(file_path, data_type, source, batch_size, dry_run, skip_embe
             click.echo("Initializing enhanced ingestion pipeline...")
             
             # Override settings with command line options
-            from ..core.config import get_settings
+            from .core.config import get_settings
             settings = get_settings()
             
             # Apply custom chunking and embedding settings
@@ -118,7 +118,7 @@ def enhanced_ingest(file_path, data_type, source, batch_size, dry_run, skip_embe
                 click.echo(f"Embedding settings: model={embedding_model}, dimensions={embedding_dimensions}")
                 
                 # Validate data without saving
-                if data_type == 'market':
+                if data_type == 'market_data':
                     click.echo(f"Validating {len(data)} market data records...")
                     validation_result = await pipeline.validate_market_data(source, data)
                 else:  # property
@@ -145,7 +145,7 @@ def enhanced_ingest(file_path, data_type, source, batch_size, dry_run, skip_embe
                 return
             
             # Process data
-            if data_type == 'market':
+            if data_type == 'market_data':
                 click.echo(f"Processing {len(data)} market data records...")
                 result = await pipeline.ingest_market_data(source, data)
             else:  # property

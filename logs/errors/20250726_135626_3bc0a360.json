@@ -1,0 +1,28 @@
+{
+  "error_id": "20250726_135626_3bc0a360",
+  "timestamp": "2025-07-26T13:56:26.751160+00:00",
+  "error_type": "IndexError",
+  "error_message": "list index out of range",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\enhanced_ingestion_pipeline.py\", line 244, in ingest_property_listings\n    embeddings, token_counts = await self.embedder.generate_embeddings_batch(chunk_texts)\n                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\david\\OneDrive\\Desktop\\Enhanced Embedding\\Track_test\\src\\trackrealties\\data\\embedding\\openai_embedder.py\", line 222, in generate_embeddings_batch\n    token_count = generated_token_counts[i]\n                  ~~~~~~~~~~~~~~~~~~~~~~^^^\nIndexError: list index out of range\n",
+  "context": {
+    "source": "redfin",
+    "record": {
+      "location": "College Station, TX metro area",
+      "date": "2025-06-23 00:00:00",
+      "median_price": 352450.0,
+      "inventory_count": 1244.0,
+      "sales_volume": 84.0,
+      "new_listings": 72.0,
+      "days_on_market": 33.0,
+      "months_supply": 14.80952381,
+      "price_per_sqft": 192.975285017,
+      "source": "redfin",
+      "region_type": "metro",
+      "region_id": "17780",
+      "duration": "1 weeks",
+      "last_updated": "2025-07-02 13:35:24.651",
+      "city": "College Station",
+      "state": "TX"
+    }
+  }
+}
